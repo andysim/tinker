@@ -75,12 +75,15 @@ c
       parameter (planck=6.62606957d-34)
       parameter (joule=4.1840d0)
       parameter (convert=4.1840d+2)
-      parameter (bohr=0.52917721092d0)
+      ! CHARMM value parameter (bohr=0.52917721092d0)
+      parameter (bohr=0.529177249d0)
       parameter (hartree=627.5094743d0)
       parameter (evolt=27.21138503d0)
       parameter (efreq=2.194746313708d+5)
-      parameter (coulomb=332.063714d0)
-      parameter (debye=4.80321d0)
+      ! CHARMM value parameter (coulomb=332.063714d0)
+      parameter (coulomb=332.0716d0)
+      ! CHARMM value parameter (debye=4.80321d0)
+      parameter (debye=4.803241267086295d0)
       parameter (prescon=6.85684112d+4)
       save
       end
