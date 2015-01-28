@@ -1,4 +1,4 @@
-../../bin/analyze contrived_water  EV
+../../bin/analyze contrived_water  EVD
 
 #  General System and Force Field Information [G]
 #  Force Field Parameters for Interactions [P]
