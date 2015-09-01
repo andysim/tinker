@@ -186,6 +186,9 @@ c
       use uprior
       implicit none
       integer i,j,k,iter
+c OPT IMPLEMENTATION
+      integer ptord
+c OPT IMPLEMENTATION
       integer maxiter
       real*8 polmin
       real*8 eps,epsold
@@ -250,7 +253,57 @@ c
 c
 c     set tolerances for computation of mutual induced dipoles
 c
-      if (poltyp .eq. 'MUTUAL') then
+
+c OPT IMPLEMENTATION
+      if (poltyp(1:3) .eq. 'OPT') then
+         ptuind(:,:,0) = uind
+         ptuinp(:,:,0) = uinp
+
+         do ptord = 1, ptmaxord
+           uind = ptuind(:,:,ptord-1)
+           uinp = ptuinp(:,:,ptord-1)
+           ptpointer = ptord-1
+           if (use_ewald) then
+              call ufield0c (field,fieldp)
+           else if (use_mlist) then
+              call ufield0b (field,fieldp)
+           else
+              call ufield0a (field,fieldp)
+           end if
+           do i = 1, npole
+              ptuind(:,i,ptord) = polarity(i)*field(:,i)
+              ptuinp(:,i,ptord) = polarity(i)*fieldp(:,i)
+           enddo
+         enddo
+
+         uind = 0d0
+         uinp = 0d0
+         do ptord = 0, ptmaxord
+           uind = uind + ptcoefs(ptord) * ptuind(:,:,ptord)
+           uinp = uinp + ptcoefs(ptord) * ptuind(:,:,ptord)
+           !!write(*,*) "PT(", ptord, ")"
+           !!write(*,*) "   UIND"
+           !!do i = 1, npole
+           !!  write(*,'(3F16.10)') ptuind(:,i,ptord)
+           !!enddo
+           !!write(*,*) "   UINP"
+           !!do i = 1, npole
+           !!  write(*,'(3F16.10)') ptuinp(:,i,ptord)
+           !!enddo
+         enddo
+         !!write(*,*) "UIND"
+         !!do i = 1,npole
+         !!   write(*,'(3F16.10)') uind(:,i)
+         !!enddo
+         !!write(*,*) "UINP"
+         !!do i = 1,npole
+         !!   write(*,'(3F16.10)') uinp(:,i)
+         !!enddo
+c OPT IMPLEMENTATION
+      else if (poltyp .eq. 'MUTUAL') then
+c OPT IMPLEMENTATION
+         ptpointer = -1
+c OPT IMPLEMENTATION
          done = .false.
          maxiter = 500
          iter = 0
@@ -1598,6 +1651,9 @@ c
       use math
       use mpole
       use pme
+c OPT IMPLEMENTATION
+      use polar
+c OPT IMPLEMENTATION
       implicit none
       integer i,j,k,ntot
       integer k1,k2,k3
@@ -1654,6 +1710,11 @@ c     assign PME grid and perform 3-D FFT forward transform
 c
       call grid_mpole (fmp)
       call fftfront
+c OPT IMPLEMENTATION
+      if (savegrids) then
+        permgridf = qgrid
+      endif
+c OPT IMPLEMENTATION
 c
 c     make the scalar summation over reciprocal lattice
 c
@@ -1720,6 +1781,11 @@ c
 c     perform 3-D FFT backward transform and get field
 c
       call fftback
+c OPT IMPLEMENTATION
+      if (savegrids) then
+        permgridr = qgrid
+      endif
+c OPT IMPLEMENTATION
       call fphi_mpole (fphi)
 c
 c     convert the field from fractional to Cartesian
@@ -2629,7 +2695,6 @@ c
       real*8, allocatable :: dipfield1(:,:)
       real*8, allocatable :: dipfield2(:,:)
 c
-c
 c     return if the Ewald coefficient is zero
 c
       if (aewald .lt. 1.0d-6)  return
@@ -2662,8 +2727,29 @@ c
 c
 c     assign PME grid and perform 3-D FFT forward transform
 c
-      call grid_uind (fuind,fuinp)
-      call fftfront
+c OPT IMPLEMENTATION
+      if (ptpointer .ge. 0) then
+c       Save the p and d grids separately.  This could use real->complex FFT
+        dipfield1 = 0d0
+        call grid_uind (fuind,dipfield1)
+        call fftfront
+        uindgridf(:,:,:,:,ptpointer) = qgrid
+        call grid_uind (dipfield1,fuinp)
+        call fftfront
+        do k = 1, nfft3
+           do j = 1, nfft2
+              do i = 1, nfft1
+                 uinpgridf(1,i,j,k,ptpointer) = qgrid(2,i,j,k)
+                 uinpgridf(2,i,j,k,ptpointer) = qgrid(1,i,j,k)
+              end do
+           end do
+        end do
+        qgrid = qgrid + uindgridf(:,:,:,:,ptpointer)
+      else
+        call grid_uind (fuind,fuinp)
+        call fftfront
+      endif
+c OPT IMPLEMENTATION
 c
 c     complete the transformation of the PME grid
 c
@@ -2680,6 +2766,11 @@ c
 c     perform 3-D FFT backward transform and get field
 c
       call fftback
+c OPT IMPLEMENTATION
+      if (ptpointer .ge. 0) then
+        uindgridr(:,:,:,:,ptpointer) = qgrid
+      endif
+c OPT IMPLEMENTATION
       call fphi_uind (fdip_phi1,fdip_phi2,fdip_sum_phi)
 c
 c     convert the dipole fields from fractional to Cartesian

@@ -24,6 +24,11 @@ c
       use limits
       use mpole
       use potent
+c OPT IMPLEMENTATION
+      use polar
+      use pme
+      use polpot
+c OPT IMPLEMENTATION
       implicit none
       integer i,ii
 c
@@ -31,6 +36,24 @@ c
 c     choose the method for summing over multipole interactions
 c
       if (use_ewald) then
+c OPT IMPLEMENTATION
+         if (savegrids) then
+            if (allocated(permgridr))  deallocate (permgridr)
+            if (allocated(permgridf))  deallocate (permgridf)
+            allocate(permgridr(2,nfft1,nfft2,nfft3))
+            allocate(permgridf(2,nfft1,nfft2,nfft3))
+         endif
+         if (poltyp(1:3) .eq. 'OPT') then
+            if (allocated(uindgridr))  deallocate (uindgridr)
+            if (allocated(uindgridf))  deallocate (uindgridf)
+            if (allocated(uinpgridr))  deallocate (uinpgridr)
+            if (allocated(uinpgridf))  deallocate (uinpgridf)
+            allocate(uindgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
+            allocate(uindgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
+            allocate(uinpgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
+            allocate(uinpgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
+         endif
+c OPT IMPLEMENTATION
          if (use_mlist) then
             call empole3d
          else

@@ -20,6 +20,20 @@ c     uind      induced dipole components at each multipole site
 c     uinp      induced dipoles in field used for energy interactions
 c     uinds     GK or PB induced dipoles at each multipole site
 c     uinps     induced dipoles in field used for GK or PB energy
+c OPT IMPLEMENTATION
+c     maxpt     the maximum allowed order of perturbation theory
+c     maxord    the maximum order or perturbation theory used in this calculation
+c     ptcoefs   the coefficients of each (partial contribution) term in the PT expantion
+c     ptcoefsf  the coefficients of each (full, i.e., summed) term in the PT expansion
+c     savegrids whether to save the FFT grids during dipole formation, for later use
+c     uinpgridf the fourier space representation of µp(0), µp(1), µp(2), etc. for PT or µp for mutual
+c     uinpgridr the real space representation of µp(0), µp(1), µp(2), etc. for PT or µp for mutual
+c     uindgridf the fourier space representation of µd(0), µd(1), µd(2), etc. for PT or µd for mutual
+c     uindgridr the real space representation of µd(0), µd(1), µd(2), etc. for PT or µd for mutual
+c     permgridf the fourier space representation of the permanent moments
+c     permgridr the real space representation of the permanent moments
+c     ptpointer a hack used to figure out where to store the current grids
+c OPT IMPLEMENTATION
 c
 c
       module polar
@@ -32,5 +46,19 @@ c
       real*8, allocatable :: uinp(:,:)
       real*8, allocatable :: uinds(:,:)
       real*8, allocatable :: uinps(:,:)
+c OPT IMPLEMENTATION
+      integer, parameter :: MAXPT = 8
+      integer ptmaxord
+      real*8 :: ptcoefs(0:MAXPT), ptcoefsf(0:MAXPT)
+      logical, parameter :: savegrids = .true.
+      integer :: ptpointer
+      real*8, allocatable :: ptuind(:,:,:), ptuinp(:,:,:)
+      real*8, allocatable :: uinpgridr(:,:,:,:,:)
+      real*8, allocatable :: uinpgridf(:,:,:,:,:)
+      real*8, allocatable :: uindgridr(:,:,:,:,:)
+      real*8, allocatable :: uindgridf(:,:,:,:,:)
+      real*8, allocatable :: permgridr(:,:,:,:)
+      real*8, allocatable :: permgridf(:,:,:,:)
+c OPT IMPLEMENTATION
       save
       end

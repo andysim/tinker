@@ -101,6 +101,10 @@ c
       if (allocated(pdamp))  deallocate (pdamp)
       if (allocated(uind))  deallocate (uind)
       if (allocated(uinp))  deallocate (uinp)
+c OPT IMPLEMENTATION
+      if (allocated(ptuind)) deallocate (ptuind)
+      if (allocated(ptuinp)) deallocate (ptuinp)
+c OPT IMPLEMENTATION
       if (allocated(uinds))  deallocate (uinds)
       if (allocated(uinps))  deallocate (uinps)
       allocate (polarity(n))
@@ -108,6 +112,10 @@ c
       allocate (pdamp(n))
       allocate (uind(3,n))
       allocate (uinp(3,n))
+c OPT IMPLEMENTATION
+      allocate (ptuind(3,n,0:ptmaxord))
+      allocate (ptuinp(3,n,0:ptmaxord))
+c OPT IMPLEMENTATION
       allocate (uinds(3,n))
       allocate (uinps(3,n))
 c

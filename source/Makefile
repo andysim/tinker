@@ -59,10 +59,10 @@ LINKDIR = $(BINDIR)
 ##  Compiler: GNU gfortran
 ##  Parallel: OpenMP
 
-F77 = gfortran
+F77 = /usr/local/bin/gfortran
 LIBS = -L$(TINKERDIR)/fftw/lib -lfftw3_threads -lfftw3
 F77FLAGS = -c
-OPTFLAGS = -O0 -O0 -ffast-math
+OPTFLAGS = -g -O0 -ffast-math
 LIBFLAGS = -crusv
 RANLIB = ranlib -c
 LINKFLAGS = $(OPTFLAGS) -static-libgcc

@@ -23,37 +23,13 @@ c
       use limits
       use mpole
       use potent
-c OPT IMPLEMENTATION
-      use polar
-      use pme
-      use polpot
-c OPT IMPLEMENTATION
       implicit none
       integer i,j,ii
 c
 c
 c     choose the method for summing over multipole interactions
 c
-
       if (use_ewald) then
-c OPT IMPLEMENTATION
-         if (savegrids) then
-            if (allocated(permgridr))  deallocate (permgridr)
-            if (allocated(permgridf))  deallocate (permgridf)
-            allocate(permgridr(2,nfft1,nfft2,nfft3))
-            allocate(permgridf(2,nfft1,nfft2,nfft3))
-         endif
-         if (poltyp(1:3) .eq. 'OPT') then
-            if (allocated(uindgridr))  deallocate (uindgridr)
-            if (allocated(uindgridf))  deallocate (uindgridf)
-            if (allocated(uinpgridr))  deallocate (uinpgridr)
-            if (allocated(uinpgridf))  deallocate (uinpgridf)
-            allocate(uindgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
-            allocate(uindgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
-            allocate(uinpgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
-            allocate(uinpgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
-         endif
-c OPT IMPLEMENTATION
          if (use_mlist) then
             call empole1d
          else
@@ -2579,6 +2555,7 @@ c
       real*8 zdfield,zufield
       real*8 trq(3),trqi(3)
       real*8 frcx(3),frcy(3),frcz(3)
+      real*8 myvxx, myvyx, myvzx, myvyy, myvzy, myvzz
 c
 c
 c     zero out multipole and polarization energy and derivatives
@@ -2608,6 +2585,10 @@ c
 c     compute the induced dipole moment at each atom
 c
       call induce
+      write(*,*) "before"
+      write(*,'(3F16.10)') vir(1,1),vir(2,1),vir(3,1)
+      write(*,'(3F16.10)') vir(1,2),vir(2,2),vir(3,2)
+      write(*,'(3F16.10)') vir(1,3),vir(2,3),vir(3,3)
 c
 c     compute the reciprocal space part of the Ewald summation
 c
@@ -2615,7 +2596,21 @@ c
 c
 c     compute the real space part of the Ewald summation
 c
+      myvxx = vir(1,1)
+      myvyx = vir(2,1)
+      myvzx = vir(3,1)
+      myvyy = vir(2,2)
+      myvzy = vir(3,2)
+      myvzz = vir(3,3)
       call ereal1c (eintra)
+      write(*,*) "real space"
+      write(*,'(3F16.10)') vir(1,1)-myvxx,vir(1,2)-myvyx,vir(1,3)-myvzx
+      write(*,'(3F16.10)') vir(2,1)-myvyx,vir(2,2)-myvyy,vir(2,3)-myvzy
+      write(*,'(3F16.10)') vir(3,1)-myvzx,vir(3,2)-myvzy,vir(3,3)-myvzz
+      write(*,*) "full virial"
+      write(*,'(3F16.10)') vir(1,1),vir(2,1),vir(3,1)
+      write(*,'(3F16.10)') vir(1,2),vir(2,2),vir(3,2)
+      write(*,'(3F16.10)') vir(1,3),vir(2,3),vir(3,3)
 c
 c     compute the Ewald self-energy term over all the atoms
 c
@@ -2800,11 +2795,6 @@ c
       use virial
       implicit none
       integer i,j,k
-c OPT IMPLEMENTATION
-      integer l, m, o
-      real*8 sci2, scip2
-      real*8 sci4, scip4, sci3, scip3, tmpftm(3)
-c OPT IMPLEMENTATION
       integer ii,kk,jcell
       integer iax,iay,iaz
       integer kax,kay,kaz
@@ -3477,98 +3467,6 @@ c
                   ftm2i(1) = ftm2i(1) + fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) + fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) + fdir(3) + findmp(3)
-c OPT IMPLEMENTATION
-               else if (poltyp(1:3) .eq. 'OPT') then
-c                 start by backing out the exact mutual terms
-                  gfd = 0.5d0 * (bn(2)*scip(2)
-     &                     - bn(3)*(scip(3)*sci(4)+sci(3)*scip(4)))
-                  gfdr = 0.5d0 * (rr5*scip(2)*usc3
-     &                     - rr7*(scip(3)*sci(4)
-     &                           +sci(3)*scip(4))*usc5)
-                  tmpftm(1) = - gfd*xr - 0.5d0*bn(2)*
-     &                          (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
-     &                          +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
-                  tmpftm(2) =  - gfd*yr - 0.5d0*bn(2)*
-     &                          (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
-     &                          +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
-                  tmpftm(3) =  - gfd*zr - 0.5d0*bn(2)*
-     &                          (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
-     &                          +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
-                  fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
-     &                         (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
-     &                        + sci(3)*uinp(1,k)+scip(3)*uind(1,k))
-                  fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
-     &                         (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
-     &                        + sci(3)*uinp(2,k)+scip(3)*uind(2,k))
-                  fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
-     &                         (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
-     &                        + sci(3)*uinp(3,k)+scip(3)*uind(3,k))
-                  ftm2i(1) = ftm2i(1) + tmpftm(1) + fdir(1) + findmp(1)
-                  ftm2i(2) = ftm2i(2) + tmpftm(2) + fdir(2) + findmp(2)
-                  ftm2i(3) = ftm2i(3) + tmpftm(3) + fdir(3) + findmp(3)
-c                 now add in the PT mutual terms
-                  do o = 0, ptmaxord
-                    do l = 0,o-1
-                      m = o - l - 1
-                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
-     &                     + ptuind(2,i,l)*ptuind(2,k,m)
-     &                     + ptuind(3,i,l)*ptuind(3,k,m)
-                      sci3 = ptuind(1,i,l)*xr
-     &                     + ptuind(2,i,l)*yr
-     &                     + ptuind(3,i,l)*zr
-                      sci4 = ptuind(1,k,m)*xr
-     &                     + ptuind(2,k,m)*yr
-     &                     + ptuind(3,k,m)*zr
-                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
-     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
-     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
-     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
-     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
-     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
-                      scip3 = ptuinp(1,i,l)*xr
-     &                      + ptuinp(2,i,l)*yr
-     &                      + ptuinp(3,i,l)*zr
-                      scip4 = ptuinp(1,k,m)*xr
-     &                      + ptuinp(2,k,m)*yr
-     &                      + ptuinp(3,k,m)*zr
-                      gfd = 0.5d0 * (bn(2)*scip2
-     &                         - bn(3)*(scip3*sci4+sci3*scip4))
-                      gfdr = 0.5d0 * (rr5*scip2*usc3
-     &                         - rr7*(scip3*sci4
-     &                               +sci3*scip4)*usc5)
-                      tmpftm(1) = gfd*xr + 0.5d0*bn(2)*
-     &                          (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
-     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
-                      tmpftm(2) = gfd*yr + 0.5d0*bn(2)*
-     &                          (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
-     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
-                      tmpftm(3) = gfd*zr + 0.5d0*bn(2)*
-     &                          (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
-     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
-                      fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
-     &                         (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
-     &                        + sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
-                      fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
-     &                         (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
-     &                        + sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
-                      fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
-     &                         (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
-     &                        + sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
-                      temp3 = 0.5d0 * rr3 * uscale(kk) * scip2
-                      temp5 = -0.5d0 * rr5 * uscale(kk)
-     &                           * (sci3*scip4+scip3*sci4)
-                      findmp(1) = temp3*ddsc3(1) + temp5*ddsc5(1)
-                      findmp(2) = temp3*ddsc3(2) + temp5*ddsc5(2)
-                      findmp(3) = temp3*ddsc3(3) + temp5*ddsc5(3)
-                      ftm2i(1) = ftm2i(1) +
-     &                        ptcoefs(o)*(tmpftm(1)-fdir(1)-findmp(1))
-                      ftm2i(2) = ftm2i(2) +
-     &                        ptcoefs(o)*(tmpftm(2)-fdir(2)-findmp(2))
-                      ftm2i(3) = ftm2i(3) +
-     &                        ptcoefs(o)*(tmpftm(3)-fdir(3)-findmp(3))
-                   enddo
-                 enddo
-c OPT IMPLEMENTATION
                end if
 c
 c     intermediate variables for induced torque terms
@@ -5998,9 +5896,6 @@ c
       use virial
       implicit none
       integer i,j,k,ii
-c OPT IMPLEMENTATION
-      integer o,l,m
-c OPT IMPLEMENTATION
       integer j1,j2,j3
       integer k1,k2,k3
       integer m1,m2,m3
@@ -6034,6 +5929,10 @@ c OPT IMPLEMENTATION
       real*8, allocatable :: fphidp(:,:)
       real*8, allocatable :: cphi(:,:)
       real*8, allocatable :: qgrip(:,:,:,:)
+      real*8 myvxx, myvyx, myvyy, myvzx, myvzy, myvzz
+      real*8 myvxx2, myvyx2, myvyy2, myvzx2, myvzy2, myvzz2
+      real*8 myvxx3, myvyx3, myvyy3, myvzx3, myvzy3, myvzz3
+      real*8 myvxx4, myvyx4, myvyy4, myvzx4, myvzy4, myvzz4
 c
 c     derivative indices into the fphi and fphidp arrays
 c
@@ -6068,6 +5967,30 @@ c
       vyy = 0.0d0
       vzy = 0.0d0
       vzz = 0.0d0
+      myvxx = 0.0d0
+      myvyx = 0.0d0
+      myvzx = 0.0d0
+      myvyy = 0.0d0
+      myvzy = 0.0d0
+      myvzz = 0.0d0
+      myvxx2 = 0.0d0
+      myvyx2 = 0.0d0
+      myvzx2 = 0.0d0
+      myvyy2 = 0.0d0
+      myvzy2 = 0.0d0
+      myvzz2 = 0.0d0
+      myvxx3 = 0.0d0
+      myvyx3 = 0.0d0
+      myvzx3 = 0.0d0
+      myvyy3 = 0.0d0
+      myvzy3 = 0.0d0
+      myvzz3 = 0.0d0
+      myvxx4 = 0.0d0
+      myvyx4 = 0.0d0
+      myvzx4 = 0.0d0
+      myvyy4 = 0.0d0
+      myvzy4 = 0.0d0
+      myvzz4 = 0.0d0
 c
 c     copy multipole moments and coordinates to local storage
 c
@@ -6193,6 +6116,14 @@ c
             vyy = vyy + h2*h2*vterm - eterm
             vzy = vzy + h3*h2*vterm
             vzz = vzz + h3*h3*vterm - eterm
+ccc     ACS
+            myvxx = myvxx + h1*h1*vterm - eterm
+            myvyx = myvyx + h2*h1*vterm
+            myvzx = myvzx + h3*h1*vterm
+            myvyy = myvyy + h2*h2*vterm - eterm
+            myvzy = myvzy + h3*h2*vterm
+            myvzz = myvzz + h3*h3*vterm - eterm
+ccc     ACS
          end if
          qfac(k1,k2,k3) = expterm
       end do
@@ -6281,9 +6212,37 @@ c
                vyy = vyy - h2*h2*vterm + eterm
                vzy = vzy - h3*h2*vterm
                vzz = vzz - h3*h3*vterm + eterm
+cccc ACS
+               myvxx4 = myvxx4 - h1*h1*vterm + eterm
+               myvyx4 = myvyx4 - h2*h1*vterm
+               myvzx4 = myvzx4 - h3*h1*vterm
+               myvyy4 = myvyy4 - h2*h2*vterm + eterm
+               myvzy4 = myvzy4 - h3*h2*vterm
+               myvzz4 = myvzz4 - h3*h3*vterm + eterm
+               myvxx = myvxx - h1*h1*vterm + eterm
+               myvyx = myvyx - h2*h1*vterm
+               myvzx = myvzx - h3*h1*vterm
+               myvyy = myvyy - h2*h2*vterm + eterm
+               myvzy = myvzy - h3*h2*vterm
+               myvzz = myvzz - h3*h3*vterm + eterm
+cccc ACS
             end if
          end do
       end if
+      write(*,*) "ind-ind gF term"
+      write(*,'(3F16.10)') myvxx4, myvyx4, myvzx4
+      write(*,'(3F16.10)') myvyx4, myvyy4, myvzy4
+      write(*,'(3F16.10)') myvzx4, myvzy4, myvzz4
+      write(*,*) "gF term"
+      write(*,'(3F16.10)') myvxx, myvyx, myvzx
+      write(*,'(3F16.10)') myvyx, myvyy, myvzy
+      write(*,'(3F16.10)') myvzx, myvzy, myvzz
+      myvxx = 0.0d0
+      myvyx = 0.0d0
+      myvzx = 0.0d0
+      myvyy = 0.0d0
+      myvzy = 0.0d0
+      myvzz = 0.0d0
 c
 c     perform deallocation of some local arrays
 c
@@ -6293,16 +6252,8 @@ c     transform permanent multipoles without induced dipoles
 c
       if (use_polar) then
          call cmp_to_fmp (cmp,fmp)
-c OPT IMPLEMENTATION
-         if (savegrids) then
-            qgrid = permgridf
-         else
-c OPT IMPLEMENTATION
-            call grid_mpole (fmp)
-            call fftfront
-c OPT IMPLEMENTATION
-         endif
-c OPT IMPLEMENTATION
+         call grid_mpole (fmp)
+         call fftfront
       end if
 c
 c     account for the zeroth grid point for a finite system
@@ -6416,7 +6367,37 @@ c
      &             - 0.5d0*(cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
          vzz = vzz - cmp(4,i)*cphi(4,i) - 2.0d0*cmp(7,i)*cphi(7,i)
      &             - cmp(9,i)*cphi(9,i) - cmp(10,i)*cphi(10,i)
+cccc ACS
+         myvxx = myvxx - cmp(2,i)*cphi(2,i) - 2.0d0*cmp(5,i)*cphi(5,i)
+     &             - cmp(8,i)*cphi(8,i) - cmp(9,i)*cphi(9,i)
+         myvyx = myvyx - 0.5d0*(cmp(3,i)*cphi(2,i)+cmp(2,i)*cphi(3,i))
+     &             - (cmp(5,i)+cmp(6,i))*cphi(8,i)
+     &             - 0.5d0*cmp(8,i)*(cphi(5,i)+cphi(6,i))
+     &             - 0.5d0*(cmp(9,i)*cphi(10,i)+cmp(10,i)*cphi(9,i))
+         myvzx = myvzx - 0.5d0*(cmp(4,i)*cphi(2,i)+cmp(2,i)*cphi(4,i))
+     &             - (cmp(5,i)+cmp(7,i))*cphi(9,i)
+     &             - 0.5d0*cmp(9,i)*(cphi(5,i)+cphi(7,i))
+     &             - 0.5d0*(cmp(8,i)*cphi(10,i)+cmp(10,i)*cphi(8,i))
+         myvyy = myvyy - cmp(3,i)*cphi(3,i) - 2.0d0*cmp(6,i)*cphi(6,i)
+     &             - cmp(8,i)*cphi(8,i) - cmp(10,i)*cphi(10,i)
+         myvzy = myvzy - 0.5d0*(cmp(4,i)*cphi(3,i)+cmp(3,i)*cphi(4,i))
+     &             - (cmp(6,i)+cmp(7,i))*cphi(10,i)
+     &             - 0.5d0*cmp(10,i)*(cphi(6,i)+cphi(7,i))
+     &             - 0.5d0*(cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
+         myvzz = myvzz - cmp(4,i)*cphi(4,i) - 2.0d0*cmp(7,i)*cphi(7,i)
+     &             - cmp(9,i)*cphi(9,i) - cmp(10,i)*cphi(10,i)
+cccc ACS
       end do
+      write(*,*) "perm probing perm term"
+      write(*,'(3F16.10)') myvxx, myvyx, myvzx
+      write(*,'(3F16.10)') myvyx, myvyy, myvzy
+      write(*,'(3F16.10)') myvzx, myvzy, myvzz
+      myvxx = 0.0d0
+      myvyx = 0.0d0
+      myvzx = 0.0d0
+      myvyy = 0.0d0
+      myvzy = 0.0d0
+      myvzz = 0.0d0
 c
 c     convert Cartesian induced dipoles to fractional coordinates
 c
@@ -6495,9 +6476,7 @@ c
                f3 = f3 + (fuind(k,i)+fuinp(k,i))*fphi(j3,i)
      &                 + fuind(k,i)*fphip(j3,i)
      &                 + fuinp(k,i)*fphid(j3,i)
-c OPT IMPLEMENTATION
-               if (poltyp.eq.'DIRECT' .or. poltyp(1:3).eq.'OPT') then
-c OPT IMPLEMENTATION
+               if (poltyp .eq. 'DIRECT') then
                   f1 = f1 - fuind(k,i)*fphip(j1,i)
      &                    - fuinp(k,i)*fphid(j1,i)
                   f2 = f2 - fuind(k,i)*fphip(j2,i)
@@ -6577,6 +6556,51 @@ c
                   cphip(j) = cphip(j) + ftc(j,k)*fphip(k,i)
                end do
             end do
+CC  THIS IS THE M TERM
+            myvxx = myvxx - 0.5d0*(cphim(2)*(uind(1,i)+uinp(1,i)))
+            myvyx = myvyx - 0.25d0*(cphim(2)*(uind(2,i)+uinp(2,i))
+     &                         +cphim(3)*(uind(1,i)+uinp(1,i)))
+            myvzx = myvzx - 0.25d0*(cphim(2)*(uind(3,i)+uinp(3,i))
+     &                         +cphim(4)*(uind(1,i)+uinp(1,i)))
+            myvyy = myvyy - 0.5d0*(cphim(3)*(uind(2,i)+uinp(2,i)))
+            myvzy = myvzy - 0.25d0*(cphim(3)*(uind(3,i)+uinp(3,i))
+     &                         +cphim(4)*(uind(2,i)+uinp(2,i)))
+            myvzz = myvzz - 0.5d0*(cphim(4)*(uind(3,i)+uinp(3,i)))
+
+CC  THIS IS THE M TERM
+         myvxx2 = myvxx2 - cphi(2,i)*cmp(2,i)
+         myvyx2 = myvyx2 - 0.5d0*(cphi(2,i)*cmp(3,i)+cphi(3,i)*cmp(2,i))
+         myvzx2 = myvzx2 - 0.5d0*(cphi(2,i)*cmp(4,i)+cphi(4,i)*cmp(2,i))
+         myvyy2 = myvyy2 - cphi(3,i)*cmp(3,i)
+         myvzy2 = myvzy2 - 0.5d0*(cphi(3,i)*cmp(4,i)+cphi(4,i)*cmp(3,i))
+         myvzz2 = myvzz2 - cphi(4,i)*cmp(4,i)
+         myvxx2 = myvxx2 - 2.0d0*cmp(5,i)*cphi(5,i) - cmp(8,i)*cphi(8,i)
+     &             - cmp(9,i)*cphi(9,i)
+         myvyx2 = myvyx2 - (cmp(5,i)+cmp(6,i))*cphi(8,i)
+     &             - 0.5d0*(cmp(8,i)*(cphi(6,i)+cphi(5,i))
+     &                  +cmp(9,i)*cphi(10,i)+cmp(10,i)*cphi(9,i))
+         myvzx2 = myvzx2 - (cmp(5,i)+cmp(7,i))*cphi(9,i)
+     &             - 0.5d0*(cmp(9,i)*(cphi(5,i)+cphi(7,i))
+     &                  +cmp(8,i)*cphi(10,i)+cmp(10,i)*cphi(8,i))
+         myvyy2 = myvyy2 - 2.0d0*cmp(6,i)*cphi(6,i) - cmp(8,i)*cphi(8,i)
+     &             - cmp(10,i)*cphi(10,i)
+         myvzy2 = myvzy2 - (cmp(6,i)+cmp(7,i))*cphi(10,i)
+     &             - 0.5d0*(cmp(10,i)*(cphi(6,i)+cphi(7,i))
+     &                  +cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
+         myvzz2 = myvzz2 - 2.0d0*cmp(7,i)*cphi(7,i) - cmp(9,i)*cphi(9,i)
+     &             - cmp(10,i)*cphi(10,i)
+         myvxx3 = myvxx3 - 0.5d0*(cphid(2)*uinp(1,i)+cphip(2)*uind(1,i))
+         myvyx3 = myvyx3 - 0.25d0*(cphid(2)*uinp(2,i)+cphip(2)*uind(2,i)
+     &                     +cphid(3)*uinp(1,i)+cphip(3)*uind(1,i))
+         myvzx3 = myvzx3 - 0.25d0*(cphid(2)*uinp(3,i)+cphip(2)*uind(3,i)
+     &                     +cphid(4)*uinp(1,i)+cphip(4)*uind(1,i))
+         myvyy3 = myvyy3 - 0.5d0*(cphid(3)*uinp(2,i)+cphip(3)*uind(2,i))
+         myvzy3 = myvzy3 - 0.25d0*(cphid(3)*uinp(3,i)+cphip(3)*uind(3,i)
+     &                     +cphid(4)*uinp(2,i)+cphip(4)*uind(2,i))
+         myvzz3 = myvzz3 - 0.5d0*(cphid(4)*uinp(3,i)+cphip(4)*uind(3,i))
+CC   ENDD
+
+
             vxx = vxx - cphi(2,i)*cmp(2,i)
      &                - 0.5d0*(cphim(2)*(uind(1,i)+uinp(1,i))
      &                        +cphid(2)*uinp(1,i)+cphip(2)*uind(1,i))
@@ -6601,6 +6625,7 @@ c
             vzz = vzz - cphi(4,i)*cmp(4,i)
      &                - 0.5d0*(cphim(4)*(uind(3,i)+uinp(3,i))
      &                        +cphid(4)*uinp(3,i)+cphip(4)*uind(3,i))
+
             vxx = vxx - 2.0d0*cmp(5,i)*cphi(5,i) - cmp(8,i)*cphi(8,i)
      &                - cmp(9,i)*cphi(9,i)
             vyx = vyx - (cmp(5,i)+cmp(6,i))*cphi(8,i)
@@ -6629,62 +6654,22 @@ c
             end if
          end do
       end if
-c OPT IMPLEMENTATION
-c
-c        now add in the PT mutual terms
-c
-         do l = 0, ptmaxord-1
-            qgrid = uindgridr(:,:,:,:,l)
-            call fphi_uind (fphid,fphip,fphidp)
-            do i = 1, npole
-               do j = 1, 10
-                  fphid(j,i) = electric * fphid(j,i)
-                  fphip(j,i) = electric * fphip(j,i)
-               end do
-            end do
-            do m = 0, ptmaxord-1
-               if(abs(ptcoefs(l+m+1)) .lt. 1D-6) cycle
-               do i = 1, npole
-                  do j = 1, 3
-                     fuind(j,i) = a(j,1)*ptuind(1,i,m)
-     &                          + a(j,2)*ptuind(2,i,m)
-     &                          + a(j,3)*ptuind(3,i,m)
-                     fuinp(j,i) = a(j,1)*ptuinp(1,i,m)
-     &                          + a(j,2)*ptuinp(2,i,m)
-     &                          + a(j,3)*ptuinp(3,i,m)
-                  end do
-               end do
-               do i = 1, npole
-                  f1 = 0.0d0
-                  f2 = 0.0d0
-                  f3 = 0.0d0
-                  do k = 1, 3
-                     j1 = deriv1(k+1)
-                     j2 = deriv2(k+1)
-                     j3 = deriv3(k+1)
-                     f1 = f1 + fuind(k,i)*fphip(j1,i)
-     &                       + fuinp(k,i)*fphid(j1,i)
-                     f2 = f2 + fuind(k,i)*fphip(j2,i)
-     &                       + fuinp(k,i)*fphid(j2,i)
-                     f3 = f3 + fuind(k,i)*fphip(j3,i)
-     &                       + fuinp(k,i)*fphid(j3,i)
-                  end do
-                  f1 = 0.5d0 * dble(nfft1) * f1
-                  f2 = 0.5d0 * dble(nfft2) * f2
-                  f3 = 0.5d0 * dble(nfft3) * f3
-                  frc(1,i) = recip(1,1)*f1+recip(1,2)*f2+recip(1,3)*f3
-                  frc(2,i) = recip(2,1)*f1+recip(2,2)*f2+recip(2,3)*f3
-                  frc(3,i) = recip(3,1)*f1+recip(3,2)*f2+recip(3,3)*f3
-               end do
-               do i = 1, npole
-                  ii = ipole(i)
-                  dep(1,ii) = dep(1,ii) + ptcoefs(l+m+1)*frc(1,i)
-                  dep(2,ii) = dep(2,ii) + ptcoefs(l+m+1)*frc(2,i)
-                  dep(3,ii) = dep(3,ii) + ptcoefs(l+m+1)*frc(3,i)
-               end do
-            enddo
-         enddo
-c OPT IMPLEMENTATION
+      write(*,*) "induced probing perm term"
+      write(*,'(3F16.10)') myvxx, myvyx, myvzx
+      write(*,'(3F16.10)') myvyx, myvyy, myvzy
+      write(*,'(3F16.10)') myvzx, myvzy, myvzz
+      write(*,*) "perm probing induced term"
+      write(*,'(3F16.10)') myvxx2, myvyx2, myvzx2
+      write(*,'(3F16.10)') myvyx2, myvyy2, myvzy2
+      write(*,'(3F16.10)') myvzx2, myvzy2, myvzz2
+      write(*,*) "ind probing ind term"
+      write(*,'(3F16.10)') myvxx3, myvyx3, myvzx3
+      write(*,'(3F16.10)') myvyx3, myvyy3, myvzy3
+      write(*,'(3F16.10)') myvzx3, myvzy3, myvzz3
+      write(*,*) "full rec virial term"
+      write(*,'(3F16.10)') vxx, vyx, vzx
+      write(*,'(3F16.10)') vyx, vyy, vzy
+      write(*,'(3F16.10)') vzx, vzy, vzz
 c
 c     increment the internal virial tensor components
 c

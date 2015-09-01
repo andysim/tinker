@@ -28,8 +28,14 @@ c
       use torpot
       use urypot
       use vdwpot
+c OPT IMPLEMENTATION
+      use polar
+c OPT IMPLEMENTATION
       implicit none
       integer next
+c OPT IMPLEMENTATION
+      integer i, j
+c OPT IMPLEMENTATION
       character*4 value
       character*20 keyword
       character*120 text
@@ -353,6 +359,22 @@ c
          read (string,*,err=10,end=10)  politer
       else if (keyword(1:10) .eq. 'POLAR-EPS ') then
          read (string,*,err=10,end=10)  poleps
+c OPT IMPLEMENTATION
+      else if (keyword(1:14) .eq. 'POLAR-PTCOEFS ') then
+         ptcoefsf = 0d0
+         read (string,*,err=10,end=12) (ptcoefsf(i), i=0,MAXPT)
+12       continue
+         do i = MAXPT, -1, -1
+           ptmaxord = i
+           if(ABS(ptcoefsf(i)) .gt. 1d-6) exit
+         enddo
+         do i = 0, ptmaxord
+           ptcoefs(i) = 0d0
+           do j = i, ptmaxord
+             ptcoefs(i) = ptcoefs(i) + ptcoefsf(j)
+           enddo
+         enddo
+c OPT IMPLEMENTATION
       else if (keyword(1:12) .eq. 'USOLVE-DIAG ') then
          read (string,*,err=10,end=10)  udiag
       else if (keyword(1:15) .eq. 'POLAR-12-SCALE ') then

@@ -560,6 +560,10 @@ c
       if (allocated(pdamp))  deallocate (pdamp)
       if (allocated(uind))  deallocate (uind)
       if (allocated(uinp))  deallocate (uinp)
+c OPT IMPLEMENTATION
+      if (allocated(ptuind))  deallocate (ptuind)
+      if (allocated(ptuinp))  deallocate (ptuinp)
+c OPT IMPLEMENTATION
       if (allocated(uinds))  deallocate (uinds)
       if (allocated(uinps))  deallocate (uinps)
 c
