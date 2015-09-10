@@ -26,10 +26,10 @@ c     maxord    the maximum order or perturbation theory used in this calculatio
 c     ptcoefs   the coefficients of each (partial contribution) term in the PT expantion
 c     ptcoefsf  the coefficients of each (full, i.e., summed) term in the PT expansion
 c     savegrids whether to save the FFT grids during dipole formation, for later use
-c     uinpgridf the fourier space representation of µp(0), µp(1), µp(2), etc. for PT or µp for mutual
-c     uinpgridr the real space representation of µp(0), µp(1), µp(2), etc. for PT or µp for mutual
-c     uindgridf the fourier space representation of µd(0), µd(1), µd(2), etc. for PT or µd for mutual
-c     uindgridr the real space representation of µd(0), µd(1), µd(2), etc. for PT or µd for mutual
+c     uindgridf the fourier space representation of µd(0), µd(1), µd(2), etc.
+c     uinpgridf the fourier space representation of µp(0), µp(1), µp(2), etc.
+c     ptfphid   the fractional coordinate rec space potential for µd(0), µd(1), µd(2), etc.
+c     ptfphip   the fractional coordinate rec space potential for µp(0), µp(1), µp(2), etc.
 c     permgridf the fourier space representation of the permanent moments
 c     permgridr the real space representation of the permanent moments
 c     ptpointer a hack used to figure out where to store the current grids
@@ -53,9 +53,9 @@ c OPT IMPLEMENTATION
       logical, parameter :: savegrids = .true.
       integer :: ptpointer
       real*8, allocatable :: ptuind(:,:,:), ptuinp(:,:,:)
-      real*8, allocatable :: uinpgridr(:,:,:,:,:)
+      real*8, allocatable :: ptfphip(:,:,:)
+      real*8, allocatable :: ptfphid(:,:,:)
       real*8, allocatable :: uinpgridf(:,:,:,:,:)
-      real*8, allocatable :: uindgridr(:,:,:,:,:)
       real*8, allocatable :: uindgridf(:,:,:,:,:)
       real*8, allocatable :: permgridr(:,:,:,:)
       real*8, allocatable :: permgridf(:,:,:,:)

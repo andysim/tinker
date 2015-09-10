@@ -2703,8 +2703,10 @@ c     perform dynamic allocation of some local arrays
 c
       allocate (fuind(3,npole))
       allocate (fuinp(3,npole))
+c OPT IMPLEMENTATION
       allocate (fdip_phi1(10,npole))
       allocate (fdip_phi2(10,npole))
+c OPT IMPLEMENTATION
       allocate (fdip_sum_phi(20,npole))
       allocate (dipfield1(3,npole))
       allocate (dipfield2(3,npole))
@@ -2766,12 +2768,13 @@ c
 c     perform 3-D FFT backward transform and get field
 c
       call fftback
+      call fphi_uind (fdip_phi1,fdip_phi2,fdip_sum_phi)
 c OPT IMPLEMENTATION
       if (ptpointer .ge. 0) then
-        uindgridr(:,:,:,:,ptpointer) = qgrid
+        ptfphid(:,:,ptpointer) = fdip_phi1
+        ptfphip(:,:,ptpointer) = fdip_phi2
       endif
 c OPT IMPLEMENTATION
-      call fphi_uind (fdip_phi1,fdip_phi2,fdip_sum_phi)
 c
 c     convert the dipole fields from fractional to Cartesian
 c

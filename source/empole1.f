@@ -44,13 +44,13 @@ c OPT IMPLEMENTATION
             allocate(permgridf(2,nfft1,nfft2,nfft3))
          endif
          if (poltyp(1:3) .eq. 'OPT') then
-            if (allocated(uindgridr))  deallocate (uindgridr)
+            if (allocated(ptfphip))  deallocate (ptfphip)
+            if (allocated(ptfphid))  deallocate (ptfphid)
             if (allocated(uindgridf))  deallocate (uindgridf)
-            if (allocated(uinpgridr))  deallocate (uinpgridr)
             if (allocated(uinpgridf))  deallocate (uinpgridf)
-            allocate(uindgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
+            allocate(ptfphip(10,npole,0:ptmaxord-1))
+            allocate(ptfphid(10,npole,0:ptmaxord-1))
             allocate(uindgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
-            allocate(uinpgridr(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
             allocate(uinpgridf(2,nfft1,nfft2,nfft3,0:ptmaxord-1))
          endif
 c OPT IMPLEMENTATION
@@ -6634,8 +6634,10 @@ c
 c        now add in the PT mutual terms
 c
          do l = 0, ptmaxord-1
-            qgrid = uindgridr(:,:,:,:,l)
-            call fphi_uind (fphid,fphip,fphidp)
+            !qgrid = uindgridr(:,:,:,:,l)
+            !call fphi_uind (fphid,fphip,fphidp)
+            fphid = ptfphid(:,:,l)
+            fphip = ptfphip(:,:,l)
             do i = 1, npole
                do j = 1, 10
                   fphid(j,i) = electric * fphid(j,i)

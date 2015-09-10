@@ -936,6 +936,275 @@ c
       end
 c
 c
+c     ################################################################
+c     ##                                                            ##
+c     ##  subroutine newfphi_uind  --  induced potential from grid  ##
+c     ##                                                            ##
+c     ################################################################
+c
+c
+c     "new_fphi_uind" extracts the induced dipole potential from
+c     the particle mesh Ewald grid.  Similar to fphi_uind, but modified
+c     to generate all terms required to get permanent-induced forces from
+c     both uind and uinp grids.
+c
+c
+      subroutine new_fphi_uind (fphid,fphip)
+      use sizes
+      use mpole
+      use pme
+      implicit none
+      integer i,j,k
+      integer isite,iatm
+      integer i0,j0,k0
+      integer it1,it2,it3
+      integer igrd0,jgrd0,kgrd0
+      real*8 v0,v1,v2,v3
+      real*8 u0,u1,u2,u3
+      real*8 grd,grp
+      real*8 t0d,t1d,t2d,t3d
+      real*8 t0p,t1p,t2p,t3p
+      real*8 tu00d,tu10d,tu01d,tu20d,tu11d
+      real*8 tu02d,tu21d,tu12d,tu30d,tu03d
+      real*8 tu00p,tu10p,tu01p,tu20p,tu11p
+      real*8 tu02p,tu21p,tu12p,tu30p,tu03p
+      real*8 tuv000d,tuv100d,tuv010d,tuv001d
+      real*8 tuv200d,tuv020d,tuv002d,tuv110d
+      real*8 tuv101d,tuv011d,tuv300d,tuv030d
+      real*8 tuv003d,tuv210d,tuv201d,tuv120d
+      real*8 tuv021d,tuv102d,tuv012d,tuv111d
+      real*8 tuv000p,tuv100p,tuv010p,tuv001p
+      real*8 tuv200p,tuv020p,tuv002p,tuv110p
+      real*8 tuv101p,tuv011p,tuv300p,tuv030p
+      real*8 tuv003p,tuv210p,tuv201p,tuv120p
+      real*8 tuv021p,tuv102p,tuv012p,tuv111p
+      real*8 fphid(20,*), fphip(20,*)
+c
+c
+c     set OpenMP directives for the major loop structure
+c
+!$OMP PARALLEL default(private) shared(npole,ipole,igrid,bsorder,
+!$OMP& nfft3,thetai3,nfft2,thetai2,nfft1,thetai1,qgrid,fphi)
+!$OMP DO
+c
+c     extract the permanent multipole field at each site
+c
+      do isite = 1, npole
+         iatm = ipole(isite)
+         igrd0 = igrid(1,iatm)
+         jgrd0 = igrid(2,iatm)
+         kgrd0 = igrid(3,iatm)
+         tuv000d = 0.0d0
+         tuv001d = 0.0d0
+         tuv010d = 0.0d0
+         tuv100d = 0.0d0
+         tuv200d = 0.0d0
+         tuv020d = 0.0d0
+         tuv002d = 0.0d0
+         tuv110d = 0.0d0
+         tuv101d = 0.0d0
+         tuv011d = 0.0d0
+         tuv300d = 0.0d0
+         tuv030d = 0.0d0
+         tuv003d = 0.0d0
+         tuv210d = 0.0d0
+         tuv201d = 0.0d0
+         tuv120d = 0.0d0
+         tuv021d = 0.0d0
+         tuv102d = 0.0d0
+         tuv012d = 0.0d0
+         tuv111d = 0.0d0
+         tuv000p = 0.0d0
+         tuv001p = 0.0d0
+         tuv010p = 0.0d0
+         tuv100p = 0.0d0
+         tuv200p = 0.0d0
+         tuv020p = 0.0d0
+         tuv002p = 0.0d0
+         tuv110p = 0.0d0
+         tuv101p = 0.0d0
+         tuv011p = 0.0d0
+         tuv300p = 0.0d0
+         tuv030p = 0.0d0
+         tuv003p = 0.0d0
+         tuv210p = 0.0d0
+         tuv201p = 0.0d0
+         tuv120p = 0.0d0
+         tuv021p = 0.0d0
+         tuv102p = 0.0d0
+         tuv012p = 0.0d0
+         tuv111p = 0.0d0
+         k0 = kgrd0
+         do it3 = 1, bsorder
+            k0 = k0 + 1
+            k = k0 + 1 + (nfft3-isign(nfft3,k0))/2
+            v0 = thetai3(1,it3,iatm)
+            v1 = thetai3(2,it3,iatm)
+            v2 = thetai3(3,it3,iatm)
+            v3 = thetai3(4,it3,iatm)
+            tu00d = 0.0d0
+            tu10d = 0.0d0
+            tu01d = 0.0d0
+            tu20d = 0.0d0
+            tu11d = 0.0d0
+            tu02d = 0.0d0
+            tu30d = 0.0d0
+            tu21d = 0.0d0
+            tu12d = 0.0d0
+            tu03d = 0.0d0
+            tu00p = 0.0d0
+            tu10p = 0.0d0
+            tu01p = 0.0d0
+            tu20p = 0.0d0
+            tu11p = 0.0d0
+            tu02p = 0.0d0
+            tu30p = 0.0d0
+            tu21p = 0.0d0
+            tu12p = 0.0d0
+            tu03p = 0.0d0
+            j0 = jgrd0
+            do it2 = 1, bsorder
+               j0 = j0 + 1
+               j = j0 + 1 + (nfft2-isign(nfft2,j0))/2
+               u0 = thetai2(1,it2,iatm)
+               u1 = thetai2(2,it2,iatm)
+               u2 = thetai2(3,it2,iatm)
+               u3 = thetai2(4,it2,iatm)
+               t0d = 0.0d0
+               t1d = 0.0d0
+               t2d = 0.0d0
+               t3d = 0.0d0
+               t0p = 0.0d0
+               t1p = 0.0d0
+               t2p = 0.0d0
+               t3p = 0.0d0
+               i0 = igrd0
+               do it1 = 1, bsorder
+                  i0 = i0 + 1
+                  i = i0 + 1 + (nfft1-isign(nfft1,i0))/2
+                  grd = qgrid(1,i,j,k)
+                  grp = qgrid(2,i,j,k)
+                  t0d = t0d + grd*thetai1(1,it1,iatm)
+                  t1d = t1d + grd*thetai1(2,it1,iatm)
+                  t2d = t2d + grd*thetai1(3,it1,iatm)
+                  t3d = t3d + grd*thetai1(4,it1,iatm)
+                  t0p = t0p + grp*thetai1(1,it1,iatm)
+                  t1p = t1p + grp*thetai1(2,it1,iatm)
+                  t2p = t2p + grp*thetai1(3,it1,iatm)
+                  t3p = t3p + grp*thetai1(4,it1,iatm)
+               end do
+               tu00d = tu00d + t0d*u0
+               tu10d = tu10d + t1d*u0
+               tu01d = tu01d + t0d*u1
+               tu20d = tu20d + t2d*u0
+               tu11d = tu11d + t1d*u1
+               tu02d = tu02d + t0d*u2
+               tu30d = tu30d + t3d*u0
+               tu21d = tu21d + t2d*u1
+               tu12d = tu12d + t1d*u2
+               tu03d = tu03d + t0d*u3
+               tu00p = tu00p + t0p*u0
+               tu10p = tu10p + t1p*u0
+               tu01p = tu01p + t0p*u1
+               tu20p = tu20p + t2p*u0
+               tu11p = tu11p + t1p*u1
+               tu02p = tu02p + t0p*u2
+               tu30p = tu30p + t3p*u0
+               tu21p = tu21p + t2p*u1
+               tu12p = tu12p + t1p*u2
+               tu03p = tu03p + t0p*u3
+            end do
+            tuv000d = tuv000d + tu00d*v0
+            tuv100d = tuv100d + tu10d*v0
+            tuv010d = tuv010d + tu01d*v0
+            tuv001d = tuv001d + tu00d*v1
+            tuv200d = tuv200d + tu20d*v0
+            tuv020d = tuv020d + tu02d*v0
+            tuv002d = tuv002d + tu00d*v2
+            tuv110d = tuv110d + tu11d*v0
+            tuv101d = tuv101d + tu10d*v1
+            tuv011d = tuv011d + tu01d*v1
+            tuv300d = tuv300d + tu30d*v0
+            tuv030d = tuv030d + tu03d*v0
+            tuv003d = tuv003d + tu00d*v3
+            tuv210d = tuv210d + tu21d*v0
+            tuv201d = tuv201d + tu20d*v1
+            tuv120d = tuv120d + tu12d*v0
+            tuv021d = tuv021d + tu02d*v1
+            tuv102d = tuv102d + tu10d*v2
+            tuv012d = tuv012d + tu01d*v2
+            tuv111d = tuv111d + tu11d*v1
+            tuv000p = tuv000p + tu00p*v0
+            tuv100p = tuv100p + tu10p*v0
+            tuv010p = tuv010p + tu01p*v0
+            tuv001p = tuv001p + tu00p*v1
+            tuv200p = tuv200p + tu20p*v0
+            tuv020p = tuv020p + tu02p*v0
+            tuv002p = tuv002p + tu00p*v2
+            tuv110p = tuv110p + tu11p*v0
+            tuv101p = tuv101p + tu10p*v1
+            tuv011p = tuv011p + tu01p*v1
+            tuv300p = tuv300p + tu30p*v0
+            tuv030p = tuv030p + tu03p*v0
+            tuv003p = tuv003p + tu00p*v3
+            tuv210p = tuv210p + tu21p*v0
+            tuv201p = tuv201p + tu20p*v1
+            tuv120p = tuv120p + tu12p*v0
+            tuv021p = tuv021p + tu02p*v1
+            tuv102p = tuv102p + tu10p*v2
+            tuv012p = tuv012p + tu01p*v2
+            tuv111p = tuv111p + tu11p*v1
+         end do
+         fphid(1,isite) = tuv000d
+         fphid(2,isite) = tuv100d
+         fphid(3,isite) = tuv010d
+         fphid(4,isite) = tuv001d
+         fphid(5,isite) = tuv200d
+         fphid(6,isite) = tuv020d
+         fphid(7,isite) = tuv002d
+         fphid(8,isite) = tuv110d
+         fphid(9,isite) = tuv101d
+         fphid(10,isite) = tuv011d
+         fphid(11,isite) = tuv300d
+         fphid(12,isite) = tuv030d
+         fphid(13,isite) = tuv003d
+         fphid(14,isite) = tuv210d
+         fphid(15,isite) = tuv201d
+         fphid(16,isite) = tuv120d
+         fphid(17,isite) = tuv021d
+         fphid(18,isite) = tuv102d
+         fphid(19,isite) = tuv012d
+         fphid(20,isite) = tuv111d
+         fphip(1,isite) = tuv000p
+         fphip(2,isite) = tuv100p
+         fphip(3,isite) = tuv010p
+         fphip(4,isite) = tuv001p
+         fphip(5,isite) = tuv200p
+         fphip(6,isite) = tuv020p
+         fphip(7,isite) = tuv002p
+         fphip(8,isite) = tuv110p
+         fphip(9,isite) = tuv101p
+         fphip(10,isite) = tuv011p
+         fphip(11,isite) = tuv300p
+         fphip(12,isite) = tuv030p
+         fphip(13,isite) = tuv003p
+         fphip(14,isite) = tuv210p
+         fphip(15,isite) = tuv201p
+         fphip(16,isite) = tuv120p
+         fphip(17,isite) = tuv021p
+         fphip(18,isite) = tuv102p
+         fphip(19,isite) = tuv012p
+         fphip(20,isite) = tuv111p
+      end do
+c
+c     end OpenMP directive for the major loop structure
+c
+!$OMP END DO
+!$OMP END PARALLEL
+      return
+      end
+c
+c
 c     #############################################################
 c     ##                                                         ##
 c     ##  subroutine fphi_uind  --  induced potential from grid  ##
