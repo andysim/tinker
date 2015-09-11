@@ -1781,12 +1781,12 @@ c
 c     perform 3-D FFT backward transform and get field
 c
       call fftback
+      call fphi_mpole (fphi)
 c OPT IMPLEMENTATION
       if (savegrids) then
-        permgridr = qgrid
+        fphiperm = fphi
       endif
 c OPT IMPLEMENTATION
-      call fphi_mpole (fphi)
 c
 c     convert the field from fractional to Cartesian
 c

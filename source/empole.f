@@ -35,9 +35,9 @@ c
       if (use_ewald) then
 c OPT IMPLEMENTATION
          if (savegrids) then
-            if (allocated(permgridr))  deallocate (permgridr)
+            if (allocated(fphiperm))  deallocate (fphiperm)
             if (allocated(permgridf))  deallocate (permgridf)
-            allocate(permgridr(2,nfft1,nfft2,nfft3))
+            allocate(fphiperm(20,npole))
             allocate(permgridf(2,nfft1,nfft2,nfft3))
          endif
          if (poltyp(1:3) .eq. 'OPT') then

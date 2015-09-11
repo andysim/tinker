@@ -38,9 +38,9 @@ c
       if (use_ewald) then
 c OPT IMPLEMENTATION
          if (savegrids) then
-            if (allocated(permgridr))  deallocate (permgridr)
+            if (allocated(fphiperm))  deallocate (fphiperm)
             if (allocated(permgridf))  deallocate (permgridf)
-            allocate(permgridr(2,nfft1,nfft2,nfft3))
+            allocate(fphiperm(20,npole))
             allocate(permgridf(2,nfft1,nfft2,nfft3))
          endif
          if (poltyp(1:3) .eq. 'OPT') then
@@ -6314,23 +6314,30 @@ c
          e = 0.5d0 * expterm * struc2
          qfac(1,1,1) = expterm
       end if
+
+c OPT IMPLEMENTATION
+      if (savegrids) then
+          fphi = fphiperm
+      else
 c
 c     complete the transformation of the PME grid
 c
-      do k = 1, nfft3
-         do j = 1, nfft2
-            do i = 1, nfft1
-               term = qfac(i,j,k)
-               qgrid(1,i,j,k) = term * qgrid(1,i,j,k)
-               qgrid(2,i,j,k) = term * qgrid(2,i,j,k)
-            end do
-         end do
-      end do
+          do k = 1, nfft3
+             do j = 1, nfft2
+                do i = 1, nfft1
+                   term = qfac(i,j,k)
+                   qgrid(1,i,j,k) = term * qgrid(1,i,j,k)
+                   qgrid(2,i,j,k) = term * qgrid(2,i,j,k)
+                end do
+             end do
+          end do
 c
 c     perform 3-D FFT backward transform and get potential
 c
-      call fftback
-      call fphi_mpole (fphi)
+          call fftback
+          call fphi_mpole (fphi)
+      endif
+c OPT IMPLEMENTATION
       do i = 1, npole
          do j = 1, 20
             fphi(j,i) = electric * fphi(j,i)

@@ -28,10 +28,10 @@ c     ptcoefsf  the coefficients of each (full, i.e., summed) term in the PT exp
 c     savegrids whether to save the FFT grids during dipole formation, for later use
 c     uindgridf the fourier space representation of µd(0), µd(1), µd(2), etc.
 c     uinpgridf the fourier space representation of µp(0), µp(1), µp(2), etc.
-c     ptfphid   the fractional coordinate rec space potential for µd(0), µd(1), µd(2), etc.
-c     ptfphip   the fractional coordinate rec space potential for µp(0), µp(1), µp(2), etc.
+c     ptfphid   the fractional coordinate rec space potential due to µd(0), µd(1), µd(2), etc.
+c     ptfphip   the fractional coordinate rec space potential due to µp(0), µp(1), µp(2), etc.
 c     permgridf the fourier space representation of the permanent moments
-c     permgridr the real space representation of the permanent moments
+c     permgridr the fractional coordinate rec space potential due to permanent moments
 c     ptpointer a hack used to figure out where to store the current grids
 c OPT IMPLEMENTATION
 c
@@ -55,9 +55,9 @@ c OPT IMPLEMENTATION
       real*8, allocatable :: ptuind(:,:,:), ptuinp(:,:,:)
       real*8, allocatable :: ptfphip(:,:,:)
       real*8, allocatable :: ptfphid(:,:,:)
+      real*8, allocatable :: fphiperm(:,:)
       real*8, allocatable :: uinpgridf(:,:,:,:,:)
       real*8, allocatable :: uindgridf(:,:,:,:,:)
-      real*8, allocatable :: permgridr(:,:,:,:)
       real*8, allocatable :: permgridf(:,:,:,:)
 c OPT IMPLEMENTATION
       save
