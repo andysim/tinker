@@ -21,6 +21,7 @@ c     uinp      induced dipoles in field used for energy interactions
 c     uinds     GK or PB induced dipoles at each multipole site
 c     uinps     induced dipoles in field used for GK or PB energy
 c OPT IMPLEMENTATION
+c     dofit     whether to fit the coeffiecients in the PT series to converged dipoles
 c     maxpt     the maximum allowed order of perturbation theory
 c     maxord    the maximum order or perturbation theory used in this calculation
 c     ptcoefs   the coefficients of each (partial contribution) term in the PT expantion
@@ -51,6 +52,7 @@ c OPT IMPLEMENTATION
       integer ptmaxord
       real*8 :: ptcoefs(0:MAXPT), ptcoefsf(0:MAXPT)
       logical, parameter :: savegrids = .true.
+      logical :: dofit = .false.
       integer :: ptpointer
       real*8, allocatable :: ptuind(:,:,:), ptuinp(:,:,:)
       real*8, allocatable :: ptfphip(:,:,:)

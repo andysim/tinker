@@ -209,6 +209,12 @@ c OPT IMPLEMENTATION
       real*8, allocatable :: conjp(:,:)
       real*8, allocatable :: vec(:,:)
       real*8, allocatable :: vecp(:,:)
+c OPT IMPLEMENTATION
+      integer ioff, addr
+      real*8  bsum, mud, ptd, erd, mup, ptp, erp, sumd
+      real*8, allocatable :: muvec(:)
+      real*8, allocatable :: xvec(:,:), beta(:), atyvec(:), xtxvec(:,:)
+c OPT IMPLEMENTATION
       logical done
       character*6 mode
 c
@@ -229,6 +235,7 @@ c
       allocate (fieldp(3,npole))
       allocate (udir(3,npole))
       allocate (udirp(3,npole))
+
 c
 c     get the electrostatic field due to permanent multipoles
 c
@@ -280,27 +287,28 @@ c OPT IMPLEMENTATION
          uinp = 0d0
          do ptord = 0, ptmaxord
            uind = uind + ptcoefs(ptord) * ptuind(:,:,ptord)
-           uinp = uinp + ptcoefs(ptord) * ptuind(:,:,ptord)
-           !!write(*,*) "PT(", ptord, ")"
-           !!write(*,*) "   UIND"
-           !!do i = 1, npole
-           !!  write(*,'(3F16.10)') ptuind(:,i,ptord)
-           !!enddo
-           !!write(*,*) "   UINP"
-           !!do i = 1, npole
-           !!  write(*,'(3F16.10)') ptuinp(:,i,ptord)
-           !!enddo
+           uinp = uinp + ptcoefs(ptord) * ptuinp(:,:,ptord)
+           !write(*,*) "PT(", ptord, ")"
+           !write(*,*) "   UIND"
+           !do i = 1, npole
+           !  write(*,'(3F16.10)') ptuind(:,i,ptord)
+           !enddo
+           !write(*,*) "   UINP"
+           !do i = 1, npole
+           !  write(*,'(3F16.10)') ptuinp(:,i,ptord)
+           !enddo
          enddo
-         !!write(*,*) "UIND"
-         !!do i = 1,npole
-         !!   write(*,'(3F16.10)') uind(:,i)
-         !!enddo
-         !!write(*,*) "UINP"
-         !!do i = 1,npole
-         !!   write(*,'(3F16.10)') uinp(:,i)
-         !!enddo
+         !write(*,*) "UIND"
+         !do i = 1,npole
+         !   write(*,'(3F16.10)') uind(:,i)
+         !enddo
+         !write(*,*) "UINP"
+         !do i = 1,npole
+         !   write(*,'(3F16.10)') uinp(:,i)
+         !enddo
+      endif
 c OPT IMPLEMENTATION
-      else if (poltyp .eq. 'MUTUAL') then
+      if (poltyp .eq. 'MUTUAL' .or. dofit) then
 c OPT IMPLEMENTATION
          ptpointer = -1
 c OPT IMPLEMENTATION
@@ -510,6 +518,132 @@ c
       deallocate (fieldp)
       deallocate (udir)
       deallocate (udirp)
+c OPT IMPLEMENTATION
+      if (dofit) then
+         ioff = 3*npole
+         allocate (xvec(6*npole,0:ptmaxord))
+         allocate (muvec(6*npole))
+         allocate (xtxvec(0:ptmaxord,0:ptmaxord))
+         allocate (beta(0:ptmaxord))
+         allocate (atyvec(0:ptmaxord))
+c        build the full PT dipoles by summing their components and then construct
+c        the metric matrix by packing uind and uinp components together
+         do j = 0,npole-1
+            xvec(3*j+1,0) = ptuind(1,j+1,0)
+            xvec(3*j+2,0) = ptuind(2,j+1,0)
+            xvec(3*j+3,0) = ptuind(3,j+1,0)
+            xvec(3*j+1+ioff,0) = ptuinp(1,j+1,0)
+            xvec(3*j+2+ioff,0) = ptuinp(2,j+1,0)
+            xvec(3*j+3+ioff,0) = ptuinp(3,j+1,0)
+         enddo
+         do i = 1,ptmaxord
+           do j = 0,npole-1
+             xvec(3*j+1,i) = xvec(3*j+1,i-1) + ptuind(1,j+1,i)
+             xvec(3*j+2,i) = xvec(3*j+2,i-1) + ptuind(2,j+1,i)
+             xvec(3*j+3,i) = xvec(3*j+3,i-1) + ptuind(3,j+1,i)
+             xvec(3*j+1+ioff,i) = xvec(3*j+1+ioff,i-1) + ptuinp(1,j+1,i)
+             xvec(3*j+2+ioff,i) = xvec(3*j+2+ioff,i-1) + ptuinp(2,j+1,i)
+             xvec(3*j+3+ioff,i) = xvec(3*j+3+ioff,i-1) + ptuinp(3,j+1,i)
+           enddo
+         enddo
+c        form the X(tranpose)X vector in upper triangular form
+         addr = 0
+         do i = 0,ptmaxord
+            do j = 0,ptmaxord
+               xtxvec(i,j) = 0d0
+               do k = 1,6*npole
+                 xtxvec(i,j) = xtxvec(i,j) + xvec(k,i) * xvec(k,j)
+               enddo
+            enddo
+         enddo
+         muvec(1:3*npole) = RESHAPE(uind, (/ 3*npole /))
+         muvec(3*npole+1:6*npole) = RESHAPE(uinp, (/ 3*npole /))
+         do i = 0,ptmaxord
+           atyvec(i) = 0d0
+           do k = 1, 6*npole
+              atyvec(i) = atyvec(i) + xvec(k,i)*muvec(k)
+           enddo
+         enddo
+
+         call invert (ptmaxord+1,xtxvec)
+
+         bsum = 0d0
+         do i = 0,ptmaxord
+           beta(i) = 0d0
+           do k = 0,ptmaxord
+              beta(i) = beta(i) + xtxvec(k,i)*atyvec(k)
+           enddo
+           bsum = bsum + beta(i)
+         enddo
+c        compute the PT dipoles, and store in xvec, for now
+         do i = 1, 6*npole
+             xvec(i,0) = beta(0)*xvec(i,0)
+         enddo
+         do i = 1, 6*npole
+             do k = 1,ptmaxord
+               xvec(i,0) = xvec(i,0) + beta(k)*xvec(i,k)
+             enddo
+         enddo
+         write(*,*)
+         write(*,*) "Quality of PT induced dipole fit:-"
+         write(*,*)
+         write(*,'(A5,A21,A20,A20)') " Atom", "UIND", "", "UINP"
+         write(*,'(A7,A8,A10,A14,A8,A8,A10,A14)')
+     &       " ", "Exact", "PT", "Error"," ", "Exact", "PT", "Error"
+         sumd = 0d0
+         sump = 0d0
+         do i = 0,npole-1
+            mud =  muvec(3*i+1)
+            ptd = xvec(3*i+1,0)
+            erd = ptd-mud
+            sumd = sumd + erd*erd
+            mup =  muvec(3*i+1+ioff)
+            ptp = xvec(3*i+1+ioff,0)
+            erp = ptp-mup
+            sump = sump + erp*erp
+            write(*,'(I4,A1,3F12.8,A4,3F12.8)')
+     &                              i+1,"X",mud,ptd,erd,"",mup,ptp,erp
+            mud =  muvec(3*i+2)
+            ptd = xvec(3*i+2,0)
+            erd = ptd-mud
+            sumd = sumd + erd*erd
+            mup =  muvec(3*i+2+ioff)
+            ptp = xvec(3*i+2+ioff,0)
+            erp = ptp-mup
+            sump = sump + erp*erp
+            write(*,'(I4,A1,3F12.8,A4,3F12.8)')
+     &                              i+1,"Y",mud,ptd,erd,"",mup,ptp,erp
+            mud =  muvec(3*i+3)
+            ptd = xvec(3*i+3,0)
+            erd = ptd-mud
+            sumd = sumd + erd*erd
+            mup =  muvec(3*i+3+ioff)
+            ptp = xvec(3*i+3+ioff,0)
+            erp = ptp-mup
+            sump = sump + erp*erp
+            write(*,'(I4,A1,3F12.8,A4,3F12.8)')
+     &                              i+1,"Z",mud,ptd,erd,"",mup,ptp,erp
+         enddo
+         write(*,*) 
+         write(*,'(A16,F12.10)') "Uind RMS error: ",
+     &                    sqrt(sumd/(3d0*npole))
+         write(*,'(A16,F12.10)') "Uinp RMS error: ",
+     &                    sqrt(sump/(3d0*npole))
+         write(*,*) 
+         write(*,'(A23)')  "Optimized coefficients:"
+         write(*,'(20F8.4)')  beta
+         write(*,*)  
+         write(*,'(A20,F8.4)')  "Sum of coefficients:", bsum
+         write(*,*)  
+
+         deallocate (xvec)
+         deallocate (muvec)
+         deallocate (xtxvec)
+         deallocate (atyvec)
+         deallocate (beta)
+         stop
+      endif
+c OPT IMPLEMENTATION
       return
       end
 c
