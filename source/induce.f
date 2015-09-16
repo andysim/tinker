@@ -184,6 +184,7 @@ c
       use potent
       use units
       use uprior
+      use files
       implicit none
       integer i,j,k,iter
 c OPT IMPLEMENTATION
@@ -210,13 +211,17 @@ c OPT IMPLEMENTATION
       real*8, allocatable :: vec(:,:)
       real*8, allocatable :: vecp(:,:)
 c OPT IMPLEMENTATION
-      integer ioff, addr
-      real*8  bsum, mud, ptd, erd, mup, ptp, erp, sumd
-      real*8, allocatable :: muvec(:)
-      real*8, allocatable :: xvec(:,:), beta(:), atyvec(:), xtxvec(:,:)
+      integer ioff, addr, imin
+      real*8  csum, erd(3), erp(3), sumd, resmin, grdmin
+      real*8, allocatable :: ptd(:,:), ptp(:,:)
 c OPT IMPLEMENTATION
       logical done
       character*6 mode
+c OPT IMPLEMENTATION
+      external savestate
+      external computegrad
+      external computehess
+c OPT IMPLEMENTATION
 c
 c
 c     zero out the induced dipoles at each site
@@ -520,109 +525,42 @@ c
       deallocate (udirp)
 c OPT IMPLEMENTATION
       if (dofit) then
-         ioff = 3*npole
-         allocate (xvec(6*npole,0:ptmaxord))
-         allocate (muvec(6*npole))
-         allocate (xtxvec(0:ptmaxord,0:ptmaxord))
-         allocate (beta(0:ptmaxord))
-         allocate (atyvec(0:ptmaxord))
-c        build the full PT dipoles by summing their components and then construct
-c        the metric matrix by packing uind and uinp components together
-         do j = 0,npole-1
-            xvec(3*j+1,0) = ptuind(1,j+1,0)
-            xvec(3*j+2,0) = ptuind(2,j+1,0)
-            xvec(3*j+3,0) = ptuind(3,j+1,0)
-            xvec(3*j+1+ioff,0) = ptuinp(1,j+1,0)
-            xvec(3*j+2+ioff,0) = ptuinp(2,j+1,0)
-            xvec(3*j+3+ioff,0) = ptuinp(3,j+1,0)
-         enddo
-         do i = 1,ptmaxord
-           do j = 0,npole-1
-             xvec(3*j+1,i) = xvec(3*j+1,i-1) + ptuind(1,j+1,i)
-             xvec(3*j+2,i) = xvec(3*j+2,i-1) + ptuind(2,j+1,i)
-             xvec(3*j+3,i) = xvec(3*j+3,i-1) + ptuind(3,j+1,i)
-             xvec(3*j+1+ioff,i) = xvec(3*j+1+ioff,i-1) + ptuinp(1,j+1,i)
-             xvec(3*j+2+ioff,i) = xvec(3*j+2+ioff,i-1) + ptuinp(2,j+1,i)
-             xvec(3*j+3+ioff,i) = xvec(3*j+3+ioff,i-1) + ptuinp(3,j+1,i)
-           enddo
-         enddo
-c        form the X(tranpose)X vector in upper triangular form
-         addr = 0
-         do i = 0,ptmaxord
-            do j = 0,ptmaxord
-               xtxvec(i,j) = 0d0
-               do k = 1,6*npole
-                 xtxvec(i,j) = xtxvec(i,j) + xvec(k,i) * xvec(k,j)
-               enddo
-            enddo
-         enddo
-         muvec(1:3*npole) = RESHAPE(uind, (/ 3*npole /))
-         muvec(3*npole+1:6*npole) = RESHAPE(uinp, (/ 3*npole /))
-         do i = 0,ptmaxord
-           atyvec(i) = 0d0
-           do k = 1, 6*npole
-              atyvec(i) = atyvec(i) + xvec(k,i)*muvec(k)
-           enddo
-         enddo
+         allocate(ptd(3,npole))
+         allocate(ptp(3,npole))
+         grdmin = 1d-10
+         call tncg('TNCG  ', 'DIAG  ', ptmaxord+1, ptcoefs, resmin, 
+     &             grdmin, computegrad, computehess, savestate)
 
-         call invert (ptmaxord+1,xtxvec)
-
-         bsum = 0d0
-         do i = 0,ptmaxord
-           beta(i) = 0d0
-           do k = 0,ptmaxord
-              beta(i) = beta(i) + xtxvec(k,i)*atyvec(k)
-           enddo
-           bsum = bsum + beta(i)
-         enddo
-c        compute the PT dipoles, and store in xvec, for now
-         do i = 1, 6*npole
-             xvec(i,0) = beta(0)*xvec(i,0)
-         enddo
-         do i = 1, 6*npole
-             do k = 1,ptmaxord
-               xvec(i,0) = xvec(i,0) + beta(k)*xvec(i,k)
-             enddo
-         enddo
          write(*,*)
          write(*,*) "Quality of PT induced dipole fit:-"
          write(*,*)
          write(*,'(A5,A21,A20,A20)') " Atom", "UIND", "", "UINP"
          write(*,'(A7,A8,A10,A14,A8,A8,A10,A14)')
      &       " ", "Exact", "PT", "Error"," ", "Exact", "PT", "Error"
+         ptd = 0d0
+         ptp = 0d0
+         do j = 0,ptmaxord
+           do i = 1,npole
+             ptd(:,i) = ptd(:,i) + ptcoefs(j)*ptuind(:,i,j)
+             ptp(:,i) = ptp(:,i) + ptcoefs(j)*ptuinp(:,i,j)
+           enddo
+         enddo
          sumd = 0d0
          sump = 0d0
-         do i = 0,npole-1
-            mud =  muvec(3*i+1)
-            ptd = xvec(3*i+1,0)
-            erd = ptd-mud
-            sumd = sumd + erd*erd
-            mup =  muvec(3*i+1+ioff)
-            ptp = xvec(3*i+1+ioff,0)
-            erp = ptp-mup
-            sump = sump + erp*erp
+         do i = 1,npole
+            erd = ptd(:,i)-uind(:,i)
+            sumd = sumd + erd(1)**2 + erd(2)**2 + erd(3)**2
+            erp = ptp(:,i)-uinp(:,i)
+            sump = sump + erp(1)**2 + erp(2)**2 + erp(3)**2
             write(*,'(I4,A1,3F12.8,A4,3F12.8)')
-     &                              i+1,"X",mud,ptd,erd,"",mup,ptp,erp
-            mud =  muvec(3*i+2)
-            ptd = xvec(3*i+2,0)
-            erd = ptd-mud
-            sumd = sumd + erd*erd
-            mup =  muvec(3*i+2+ioff)
-            ptp = xvec(3*i+2+ioff,0)
-            erp = ptp-mup
-            sump = sump + erp*erp
+     &              i,"X",uind(1,i),ptd(1,i),erd(1),
+     &                 "",uinp(1,i),ptp(1,i),erp(1)
             write(*,'(I4,A1,3F12.8,A4,3F12.8)')
-     &                              i+1,"Y",mud,ptd,erd,"",mup,ptp,erp
-            mud =  muvec(3*i+3)
-            ptd = xvec(3*i+3,0)
-            erd = ptd-mud
-            sumd = sumd + erd*erd
-            mup =  muvec(3*i+3+ioff)
-            ptp = xvec(3*i+3+ioff,0)
-            erp = ptp-mup
-            sump = sump + erp*erp
+     &              i,"Y",uind(2,i),ptd(2,i),erd(2),
+     &                 "",uinp(2,i),ptp(2,i),erp(2)
             write(*,'(I4,A1,3F12.8,A4,3F12.8)')
-     &                              i+1,"Z",mud,ptd,erd,"",mup,ptp,erp
+     &              i,"Z",uind(3,i),ptd(3,i),erd(3),
+     &                 "",uinp(3,i),ptp(3,i),erp(3)
          enddo
          write(*,*) 
          write(*,'(A16,F12.10)') "Uind RMS error: ",
@@ -631,19 +569,193 @@ c        compute the PT dipoles, and store in xvec, for now
      &                    sqrt(sump/(3d0*npole))
          write(*,*) 
          write(*,'(A23)')  "Optimized coefficients:"
-         write(*,'(20F8.4)')  beta
+         write(*,'(20F8.4)')  ptcoefsf(0:ptmaxord)
          write(*,*)  
-         write(*,'(A20,F8.4)')  "Sum of coefficients:", bsum
+         csum = 0d0
+         do i = 0,ptmaxord
+           csum = csum + ptcoefsf(i)
+         enddo
+         write(*,'(A20,F8.4)')  "Sum of coefficients:", csum
          write(*,*)  
 
-         deallocate (xvec)
-         deallocate (muvec)
-         deallocate (xtxvec)
-         deallocate (atyvec)
-         deallocate (beta)
+         deallocate(ptd)
+         deallocate(ptp)
          stop
       endif
 c OPT IMPLEMENTATION
+      return
+      end
+
+      function computegrad (xx,g)
+      use polar
+      use mpole
+      implicit none
+      integer i,j,jj,nvar,ncart,limit
+      real*8 computegrad
+      real*8 xx(0:ptmaxord), g(0:ptmaxord)
+      real*8 c
+      real*8, allocatable :: difd(:,:), difp(:,:)
+
+      nvar = ptmaxord+1
+      ncart = 3*npole
+      allocate(difd(3,npole))
+      if (includeuinp .ne. 0) allocate(difp(3,npole))
+
+c     difference is just uind - ptuind
+      difd = uind
+      if (includeuinp .ne. 0) difp = uinp
+
+      do i = 0,ptmaxord
+        do j = 1,npole
+          difd(:,j) = difd(:,j) - xx(i)*ptuind(:,j,i)
+        enddo
+        if (includeuinp .ne. 0) then
+           do j = 1,npole
+             difp(:,j) = difp(:,j) - xx(i)*ptuinp(:,j,i)
+           enddo
+        endif
+      enddo
+
+c     the residual is simply 0.5 dif.dif
+      computegrad = 0d0
+      do i = 1,npole
+        computegrad = computegrad + 
+     &       difd(1,i)**2 + difd(2,i)**2 + difd(3,i)**2
+      enddo
+      if(includeuinp .ne. 0) then
+        do i = 1,npole
+          computegrad = computegrad + 
+     &         difp(1,i)**2 + difp(2,i)**2 + difp(3,i)**2
+        enddo
+      endif
+      computegrad = 0.5d0*computegrad
+
+      do i = 0,ptmaxord
+        g(i) = 0d0
+        do j = 1,npole
+          g(i) = g(i) - ptuind(1,j,i)*difd(1,j)
+     &                - ptuind(2,j,i)*difd(2,j)
+     &                - ptuind(3,j,i)*difd(3,j)
+        enddo
+        if (includeuinp .ne. 0) then
+          do j = 1,npole
+            g(i) = g(i) - ptuinp(1,j,i)*difp(1,j)
+     &                  - ptuinp(2,j,i)*difp(2,j)
+     &                  - ptuinp(3,j,i)*difp(3,j)
+          enddo
+        endif
+      enddo
+
+      deallocate(difd)
+      if (includeuinp .ne. 0) deallocate(difp)
+      return
+      end
+
+
+      function computehess (mode,xx,h,hinit,hstop,hindex,hdiag)
+      use polar
+      use mpole
+      implicit none
+      integer hinit(*)
+      integer hstop(*)
+      integer hindex(*)
+      integer i,j,k,ncart,addr,nvar
+      real*8 computehess
+      real*8 xx(*)
+      real*8 hdiag(*)
+      real*8 h(*)
+      character*4 mode
+
+      if (mode .eq. 'NONE')  return
+
+      nvar = ptmaxord+1
+
+c     compute the diagonals of the hessian matrix
+      do i = 1,nvar
+        hdiag(i) = 0d0
+        do k = 1,npole
+          hdiag(i) = hdiag(i) + ptuind(1,k,i-1)*ptuind(1,k,i-1)
+     &                        + ptuind(2,k,i-1)*ptuind(2,k,i-1)
+     &                        + ptuind(3,k,i-1)*ptuind(3,k,i-1)
+        enddo
+        if (includeuinp .ne. 0) then
+          do k = 1,npole
+            hdiag(i) = hdiag(i) + ptuinp(1,k,i-1)*ptuinp(1,k,i-1)
+     &                          + ptuinp(2,k,i-1)*ptuinp(2,k,i-1)
+     &                          + ptuinp(3,k,i-1)*ptuinp(3,k,i-1)
+          enddo
+        endif
+      enddo
+
+
+      if (mode .eq. 'DIAG')  return
+
+c     now compute the off-diagonals of the hessian matrix
+      addr = 1
+      do i = 1,nvar
+        hinit(i) = addr
+        do j = i+1,nvar
+          h(addr) = 0d0
+          do k = 1,npole
+            h(addr) = h(addr) + ptuind(1,k,i-1)*ptuind(1,k,j-1)
+     &                        + ptuind(2,k,i-1)*ptuind(2,k,j-1)
+     &                        + ptuind(3,k,i-1)*ptuind(3,k,j-1)
+          enddo
+          if (includeuinp .ne. 0) then
+            do k = 1,npole
+              h(addr) = h(addr) + ptuinp(1,k,i-1)*ptuinp(1,k,j-1)
+     &                          + ptuinp(2,k,i-1)*ptuinp(2,k,j-1)
+     &                          + ptuinp(3,k,i-1)*ptuinp(3,k,j-1)
+            enddo
+          endif
+          hindex(addr) = j
+          addr = addr + 1
+        enddo
+        hstop(i) = addr-1
+      enddo
+
+      end
+
+      subroutine savestate (ncycle,f,xx)
+      use polar
+      implicit none
+      integer i,j,iopt,iend
+      integer ncycle,nvar
+      integer lext,freeunit
+      real*8 f,xx(0:ptmaxord+1)
+      logical exist
+      character*7 ext
+      character*120 optfile
+      character*120 endfile
+c      
+c     map the partial coefficients back to full coefficients
+c
+      do i = ptmaxord,0,-1
+         ptcoefsf(i) = xx(i)
+         do j = i+1,ptmaxord
+            ptcoefsf(i) = ptcoefsf(i) - ptcoefsf(j)
+         enddo
+      enddo
+c
+c     test for requested termination of the optimization
+c
+CCCC      endfile = 'tinker.end'
+CCCC      inquire (file=endfile,exist=exist)
+CCCC      if (.not. exist) then
+CCCC         endfile = filename(1:leng)//'.end'
+CCCC         inquire (file=endfile,exist=exist)
+CCCC         if (exist) then
+CCCC            iend = freeunit ()
+CCCC            open (unit=iend,file=endfile,status='old')
+CCCC            close (unit=iend,status='delete')
+CCCC         end if
+CCCC      end if
+CCCC      if (exist) then
+CCCC         write (iout,10)
+CCCC   10    format (/,' OPTSAVE  --  Optimization Calculation Ending',
+CCCC     &              ' due to User Request')
+CCCC         call fatal
+CCCC      end if
       return
       end
 c

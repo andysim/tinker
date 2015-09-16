@@ -362,6 +362,8 @@ c
 c OPT IMPLEMENTATION
       else if (keyword(1:12) .eq. 'FINDPTCOEFS') then
          dofit = .true.
+         includeuinp = 1
+         read (string,*,err=10,end=10)  includeuinp
       else if (keyword(1:14) .eq. 'POLAR-PTCOEFS ') then
          ptcoefsf = 0d0
          read (string,*,err=10,end=12) (ptcoefsf(i), i=0,MAXPT)

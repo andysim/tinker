@@ -34,6 +34,7 @@ c     ptfphip   the fractional coordinate rec space potential due to µp(0), µp
 c     permgridf the fourier space representation of the permanent moments
 c     permgridr the fractional coordinate rec space potential due to permanent moments
 c     ptpointer a hack used to figure out where to store the current grids
+c     includeuinp whether to include uinp when determining optimal PT coeffiecients
 c OPT IMPLEMENTATION
 c
 c
@@ -53,6 +54,7 @@ c OPT IMPLEMENTATION
       real*8 :: ptcoefs(0:MAXPT), ptcoefsf(0:MAXPT)
       logical, parameter :: savegrids = .true.
       logical :: dofit = .false.
+      integer :: includeuinp = 1
       integer :: ptpointer
       real*8, allocatable :: ptuind(:,:,:), ptuinp(:,:,:)
       real*8, allocatable :: ptfphip(:,:,:)
