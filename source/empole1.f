@@ -188,6 +188,11 @@ c
       real*8, allocatable :: pscale(:)
       real*8, allocatable :: dscale(:)
       real*8, allocatable :: uscale(:)
+c OPT IMPLEMENTATION
+      integer l, m, o
+      real*8 sci2, scip2
+      real*8 sci4, scip4, sci3, scip3, ftmtmp(3)
+c OPT IMPLEMENTATION
       logical proceed,usei,usek
       character*6 mode
 c
@@ -721,6 +726,70 @@ c
                   ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c OPT IMPLEMENTATION
+               else if (poltyp(1:3) .eq. 'OPT') then
+c                 start by backing out the exact mutual terms
+                  gfd = 0.5d0 * (rr5*scip(2)*scale3i
+     &                  - rr7*(scip(3)*sci(4)+sci(3)*scip(4))*scale5i)
+                  temp5 = 0.5d0 * rr5 * scale5i
+                  fdir(1) = gfd*xr + temp5
+     &                         * (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                           +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  fdir(2) = gfd*yr + temp5
+     &                         * (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                           +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  fdir(3) = gfd*zr + temp5
+     &                         * (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                           +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
+                  ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
+                  ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c                 now add in the PT mutual terms
+                  do o = 0, ptmaxord
+                    do l = 0,o-1
+                      m = o - l - 1
+                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
+     &                     + ptuind(2,i,l)*ptuind(2,k,m)
+     &                     + ptuind(3,i,l)*ptuind(3,k,m)
+                      sci3 = ptuind(1,i,l)*xr
+     &                     + ptuind(2,i,l)*yr
+     &                     + ptuind(3,i,l)*zr
+                      sci4 = ptuind(1,k,m)*xr
+     &                     + ptuind(2,k,m)*yr
+     &                     + ptuind(3,k,m)*zr
+                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
+     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
+     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
+     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
+     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
+     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
+                      scip3 = ptuinp(1,i,l)*xr
+     &                      + ptuinp(2,i,l)*yr
+     &                      + ptuinp(3,i,l)*zr
+                      scip4 = ptuinp(1,k,m)*xr
+     &                      + ptuinp(2,k,m)*yr
+     &                      + ptuinp(3,k,m)*zr
+                      gfd = 0.5d0 * (rr5*scip2*scale3i
+     &                     - rr7*(scip3*sci4+sci3*scip4)*scale5i)
+                      temp5 = 0.5d0 * rr5 * scale5i
+                      ftmtmp(1) = -gfd*xr - temp5
+     &                        * (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      ftmtmp(2) = -gfd*yr - temp5
+     &                        * (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      ftmtmp(3) = -gfd*zr - temp5
+     &                        * (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      ftm2i(1) = ftm2i(1) +
+     &                        ptcoefs(o)*(ftmtmp(1)-fdir(1)-findmp(1))
+                      ftm2i(2) = ftm2i(2) +
+     &                        ptcoefs(o)*(ftmtmp(2)-fdir(2)-findmp(2))
+                      ftm2i(3) = ftm2i(3) +
+     &                        ptcoefs(o)*(ftmtmp(3)-fdir(3)-findmp(3))
+                   enddo
+                 enddo
+c OPT IMPLEMENTATION
                end if
 c
 c     intermediate terms for induced torque on multipoles
@@ -1413,6 +1482,70 @@ c
                   ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c OPT IMPLEMENTATION
+               else if (poltyp(1:3) .eq. 'OPT') then
+c                 start by backing out the exact mutual terms
+                  gfd = 0.5d0 * (rr5*scip(2)*scale3i
+     &                  - rr7*(scip(3)*sci(4)+sci(3)*scip(4))*scale5i)
+                  temp5 = 0.5d0 * rr5 * scale5i
+                  fdir(1) = gfd*xr + temp5
+     &                         * (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                           +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  fdir(2) = gfd*yr + temp5
+     &                         * (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                           +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  fdir(3) = gfd*zr + temp5
+     &                         * (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                           +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
+                  ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
+                  ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c                 now add in the PT mutual terms
+                  do o = 0, ptmaxord
+                    do l = 0,o-1
+                      m = o - l - 1
+                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
+     &                     + ptuind(2,i,l)*ptuind(2,k,m)
+     &                     + ptuind(3,i,l)*ptuind(3,k,m)
+                      sci3 = ptuind(1,i,l)*xr
+     &                     + ptuind(2,i,l)*yr
+     &                     + ptuind(3,i,l)*zr
+                      sci4 = ptuind(1,k,m)*xr
+     &                     + ptuind(2,k,m)*yr
+     &                     + ptuind(3,k,m)*zr
+                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
+     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
+     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
+     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
+     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
+     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
+                      scip3 = ptuinp(1,i,l)*xr
+     &                      + ptuinp(2,i,l)*yr
+     &                      + ptuinp(3,i,l)*zr
+                      scip4 = ptuinp(1,k,m)*xr
+     &                      + ptuinp(2,k,m)*yr
+     &                      + ptuinp(3,k,m)*zr
+                      gfd = 0.5d0 * (rr5*scip2*scale3i
+     &                     - rr7*(scip3*sci4+sci3*scip4)*scale5i)
+                      temp5 = 0.5d0 * rr5 * scale5i
+                      ftmtmp(1) = -gfd*xr - temp5
+     &                        * (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      ftmtmp(2) = -gfd*yr - temp5
+     &                        * (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      ftmtmp(3) = -gfd*zr - temp5
+     &                        * (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      ftm2i(1) = ftm2i(1) +
+     &                        ptcoefs(o)*(ftmtmp(1)-fdir(1)-findmp(1))
+                      ftm2i(2) = ftm2i(2) +
+     &                        ptcoefs(o)*(ftmtmp(2)-fdir(2)-findmp(2))
+                      ftm2i(3) = ftm2i(3) +
+     &                        ptcoefs(o)*(ftmtmp(3)-fdir(3)-findmp(3))
+                   enddo
+                 enddo
+c OPT IMPLEMENTATION
                end if
 c
 c     intermediate terms for induced torque on multipoles
@@ -1672,6 +1805,11 @@ c
       use virial
       implicit none
       integer i,j,k
+c OPT IMPLEMENTATION
+      integer l, m, o
+      real*8 sci2, scip2
+      real*8 sci4, scip4, sci3, scip3, ftmtmp(3)
+c OPT IMPLEMENTATION
       integer ii,kk,kkk
       integer ix,iy,iz
       integer kx,ky,kz
@@ -2316,6 +2454,70 @@ c
                   ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c OPT IMPLEMENTATION
+               else if (poltyp(1:3) .eq. 'OPT') then
+c                 start by backing out the exact mutual terms
+                  gfd = 0.5d0 * (rr5*scip(2)*scale3i
+     &                  - rr7*(scip(3)*sci(4)+sci(3)*scip(4))*scale5i)
+                  temp5 = 0.5d0 * rr5 * scale5i
+                  fdir(1) = gfd*xr + temp5
+     &                         * (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                           +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  fdir(2) = gfd*yr + temp5
+     &                         * (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                           +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  fdir(3) = gfd*zr + temp5
+     &                         * (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                           +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  ftm2i(1) = ftm2i(1) - fdir(1) + findmp(1)
+                  ftm2i(2) = ftm2i(2) - fdir(2) + findmp(2)
+                  ftm2i(3) = ftm2i(3) - fdir(3) + findmp(3)
+c                 now add in the PT mutual terms
+                  do o = 0, ptmaxord
+                    do l = 0,o-1
+                      m = o - l - 1
+                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
+     &                     + ptuind(2,i,l)*ptuind(2,k,m)
+     &                     + ptuind(3,i,l)*ptuind(3,k,m)
+                      sci3 = ptuind(1,i,l)*xr
+     &                     + ptuind(2,i,l)*yr
+     &                     + ptuind(3,i,l)*zr
+                      sci4 = ptuind(1,k,m)*xr
+     &                     + ptuind(2,k,m)*yr
+     &                     + ptuind(3,k,m)*zr
+                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
+     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
+     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
+     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
+     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
+     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
+                      scip3 = ptuinp(1,i,l)*xr
+     &                      + ptuinp(2,i,l)*yr
+     &                      + ptuinp(3,i,l)*zr
+                      scip4 = ptuinp(1,k,m)*xr
+     &                      + ptuinp(2,k,m)*yr
+     &                      + ptuinp(3,k,m)*zr
+                      gfd = 0.5d0 * (rr5*scip2*scale3i
+     &                     - rr7*(scip3*sci4+sci3*scip4)*scale5i)
+                      temp5 = 0.5d0 * rr5 * scale5i
+                      ftmtmp(1) = -gfd*xr - temp5
+     &                        * (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      ftmtmp(2) = -gfd*yr - temp5
+     &                        * (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      ftmtmp(3) = -gfd*zr - temp5
+     &                        * (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      ftm2i(1) = ftm2i(1) +
+     &                        ptcoefs(o)*(ftmtmp(1)-fdir(1)-findmp(1))
+                      ftm2i(2) = ftm2i(2) +
+     &                        ptcoefs(o)*(ftmtmp(2)-fdir(2)-findmp(2))
+                      ftm2i(3) = ftm2i(3) +
+     &                        ptcoefs(o)*(ftmtmp(3)-fdir(3)-findmp(3))
+                   enddo
+                 enddo
+c OPT IMPLEMENTATION
                end if
 c
 c     intermediate variables for induced torque components
@@ -4381,6 +4583,98 @@ c
                   ftm2i(1) = ftm2i(1) + fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) + fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) + fdir(3) + findmp(3)
+c OPT IMPLEMENTATION
+               else if (poltyp(1:3) .eq. 'OPT') then
+c                 start by backing out the exact mutual terms
+                  gfd = 0.5d0 * (bn(2)*scip(2)
+     &                     - bn(3)*(scip(3)*sci(4)+sci(3)*scip(4)))
+                  gfdr = 0.5d0 * (rr5*scip(2)*usc3
+     &                     - rr7*(scip(3)*sci(4)
+     &                           +sci(3)*scip(4))*usc5)
+                  tmpftm(1) = - gfd*xr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                          +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  tmpftm(2) =  - gfd*yr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                          +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  tmpftm(3) =  - gfd*zr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                          +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                        + sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                        + sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                        + sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  ftm2i(1) = ftm2i(1) + tmpftm(1) + fdir(1) + findmp(1)
+                  ftm2i(2) = ftm2i(2) + tmpftm(2) + fdir(2) + findmp(2)
+                  ftm2i(3) = ftm2i(3) + tmpftm(3) + fdir(3) + findmp(3)
+c                 now add in the PT mutual terms
+                  do o = 0, ptmaxord
+                    do l = 0,o-1
+                      m = o - l - 1
+                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
+     &                     + ptuind(2,i,l)*ptuind(2,k,m)
+     &                     + ptuind(3,i,l)*ptuind(3,k,m)
+                      sci3 = ptuind(1,i,l)*xr
+     &                     + ptuind(2,i,l)*yr
+     &                     + ptuind(3,i,l)*zr
+                      sci4 = ptuind(1,k,m)*xr
+     &                     + ptuind(2,k,m)*yr
+     &                     + ptuind(3,k,m)*zr
+                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
+     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
+     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
+     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
+     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
+     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
+                      scip3 = ptuinp(1,i,l)*xr
+     &                      + ptuinp(2,i,l)*yr
+     &                      + ptuinp(3,i,l)*zr
+                      scip4 = ptuinp(1,k,m)*xr
+     &                      + ptuinp(2,k,m)*yr
+     &                      + ptuinp(3,k,m)*zr
+                      gfd = 0.5d0 * (bn(2)*scip2
+     &                         - bn(3)*(scip3*sci4+sci3*scip4))
+                      gfdr = 0.5d0 * (rr5*scip2*usc3
+     &                         - rr7*(scip3*sci4
+     &                               +sci3*scip4)*usc5)
+                      tmpftm(1) = gfd*xr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      tmpftm(2) = gfd*yr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      tmpftm(3) = gfd*zr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                        + sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                        + sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                        + sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      temp3 = 0.5d0 * rr3 * uscale(kk) * scip2
+                      temp5 = -0.5d0 * rr5 * uscale(kk)
+     &                           * (sci3*scip4+scip3*sci4)
+                      findmp(1) = temp3*ddsc3(1) + temp5*ddsc5(1)
+                      findmp(2) = temp3*ddsc3(2) + temp5*ddsc5(2)
+                      findmp(3) = temp3*ddsc3(3) + temp5*ddsc5(3)
+                      ftm2i(1) = ftm2i(1) +
+     &                        ptcoefs(o)*(tmpftm(1)-fdir(1)-findmp(1))
+                      ftm2i(2) = ftm2i(2) +
+     &                        ptcoefs(o)*(tmpftm(2)-fdir(2)-findmp(2))
+                      ftm2i(3) = ftm2i(3) +
+     &                        ptcoefs(o)*(tmpftm(3)-fdir(3)-findmp(3))
+                   enddo
+                 enddo
+c OPT IMPLEMENTATION
                end if
 c
 c     intermediate variables for induced torque terms
