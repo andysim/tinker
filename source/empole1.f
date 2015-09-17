@@ -7002,7 +7002,8 @@ c
 c     assign just the induced multipoles to PME grid
 c     and perform the 3-D FFT forward transformation
 c
-      if (use_polar .and. poltyp.eq.'DIRECT') then
+      if (use_polar .and. 
+     &       (poltyp.eq.'DIRECT' .or. poltyp(1:3).eq.'OPT')) then
          do i = 1, npole
             do j = 1, 10
                cmp(j,i) = 0.0d0
@@ -7089,6 +7090,18 @@ c
 c
 c     perform deallocation of some local arrays
 c
+
+c
+c        add in the PT mutual terms
+c
+         do l = 0, ptmaxord-1
+            do m = 0, ptmaxord-1
+               if(abs(ptcoefs(l+m+1)) .lt. 1D-6) cycle
+               call scalarsum(uindgridf(:,:,:,:,l), uinpgridf(:,:,:,:,m)
+     &               ,ptcoefs(l+m+1),vxx,vyx,vzx,vyy,vzy,vzz)
+            enddo
+         enddo
+c OPT IMPLEMENTATION
       deallocate (qgrip)
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c
