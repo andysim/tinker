@@ -4909,6 +4909,11 @@ c
       use virial
       implicit none
       integer i,j,k
+c OPT IMPLEMENTATION
+      integer l, m, o
+      real*8 sci2, scip2
+      real*8 sci4, scip4, sci3, scip3, tmpftm(3)
+c OPT IMPLEMENTATION
       integer ii,kk,kkk
       integer iax,iay,iaz
       integer kax,kay,kaz
@@ -5656,6 +5661,98 @@ c
                   ftm2i(1) = ftm2i(1) + fdir(1) + findmp(1)
                   ftm2i(2) = ftm2i(2) + fdir(2) + findmp(2)
                   ftm2i(3) = ftm2i(3) + fdir(3) + findmp(3)
+c OPT IMPLEMENTATION
+               else if (poltyp(1:3) .eq. 'OPT') then
+c                 start by backing out the exact mutual terms
+                  gfd = 0.5d0 * (bn(2)*scip(2)
+     &                     - bn(3)*(scip(3)*sci(4)+sci(3)*scip(4)))
+                  gfdr = 0.5d0 * (rr5*scip(2)*usc3
+     &                     - rr7*(scip(3)*sci(4)
+     &                           +sci(3)*scip(4))*usc5)
+                  tmpftm(1) = - gfd*xr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                          +sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  tmpftm(2) =  - gfd*yr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                          +sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  tmpftm(3) =  - gfd*zr - 0.5d0*bn(2)*
+     &                          (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                          +sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(1,i)+scip(4)*uind(1,i)
+     &                        + sci(3)*uinp(1,k)+scip(3)*uind(1,k))
+                  fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(2,i)+scip(4)*uind(2,i)
+     &                        + sci(3)*uinp(2,k)+scip(3)*uind(2,k))
+                  fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
+     &                         (sci(4)*uinp(3,i)+scip(4)*uind(3,i)
+     &                        + sci(3)*uinp(3,k)+scip(3)*uind(3,k))
+                  ftm2i(1) = ftm2i(1) + tmpftm(1) + fdir(1) + findmp(1)
+                  ftm2i(2) = ftm2i(2) + tmpftm(2) + fdir(2) + findmp(2)
+                  ftm2i(3) = ftm2i(3) + tmpftm(3) + fdir(3) + findmp(3)
+c                 now add in the PT mutual terms
+                  do o = 0, ptmaxord
+                    do l = 0,o-1
+                      m = o - l - 1
+                      sci2 = ptuind(1,i,l)*ptuind(1,k,m)
+     &                     + ptuind(2,i,l)*ptuind(2,k,m)
+     &                     + ptuind(3,i,l)*ptuind(3,k,m)
+                      sci3 = ptuind(1,i,l)*xr
+     &                     + ptuind(2,i,l)*yr
+     &                     + ptuind(3,i,l)*zr
+                      sci4 = ptuind(1,k,m)*xr
+     &                     + ptuind(2,k,m)*yr
+     &                     + ptuind(3,k,m)*zr
+                      scip2 = ptuind(1,i,l)*ptuinp(1,k,m)
+     &                       +ptuind(2,i,l)*ptuinp(2,k,m)
+     &                       +ptuind(3,i,l)*ptuinp(3,k,m)
+     &                       +ptuinp(1,i,l)*ptuind(1,k,m)
+     &                       +ptuinp(2,i,l)*ptuind(2,k,m)
+     &                       +ptuinp(3,i,l)*ptuind(3,k,m)
+                      scip3 = ptuinp(1,i,l)*xr
+     &                      + ptuinp(2,i,l)*yr
+     &                      + ptuinp(3,i,l)*zr
+                      scip4 = ptuinp(1,k,m)*xr
+     &                      + ptuinp(2,k,m)*yr
+     &                      + ptuinp(3,k,m)*zr
+                      gfd = 0.5d0 * (bn(2)*scip2
+     &                         - bn(3)*(scip3*sci4+sci3*scip4))
+                      gfdr = 0.5d0 * (rr5*scip2*usc3
+     &                         - rr7*(scip3*sci4
+     &                               +sci3*scip4)*usc5)
+                      tmpftm(1) = gfd*xr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      tmpftm(2) = gfd*yr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      tmpftm(3) = gfd*zr + 0.5d0*bn(2)*
+     &                          (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      fdir(1) = gfdr*xr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
+     &                        + sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
+                      fdir(2) = gfdr*yr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
+     &                        + sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
+                      fdir(3) = gfdr*zr + 0.5d0*usc5*rr5*
+     &                         (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
+     &                        + sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      temp3 = 0.5d0 * rr3 * uscale(kk) * scip2
+                      temp5 = -0.5d0 * rr5 * uscale(kk)
+     &                           * (sci3*scip4+scip3*sci4)
+                      findmp(1) = temp3*ddsc3(1) + temp5*ddsc5(1)
+                      findmp(2) = temp3*ddsc3(2) + temp5*ddsc5(2)
+                      findmp(3) = temp3*ddsc3(3) + temp5*ddsc5(3)
+                      ftm2i(1) = ftm2i(1) +
+     &                        ptcoefs(o)*(tmpftm(1)-fdir(1)-findmp(1))
+                      ftm2i(2) = ftm2i(2) +
+     &                        ptcoefs(o)*(tmpftm(2)-fdir(2)-findmp(2))
+                      ftm2i(3) = ftm2i(3) +
+     &                        ptcoefs(o)*(tmpftm(3)-fdir(3)-findmp(3))
+                   enddo
+                 enddo
+c OPT IMPLEMENTATION
                end if
 c
 c     get the permanent torque with screening
@@ -6099,196 +6196,6 @@ c     perform dynamic allocation of some local arrays
 c
       allocate (qgrip(2,nfft1,nfft2,nfft3))
 c
-c     assign permanent and induced multipoles to PME grid
-c     and perform the 3-D FFT forward transformation
-c
-      if (use_polar) then
-         do i = 1, npole
-            do j = 2, 4
-               cmp(j,i) = cmp(j,i) + uinp(j-1,i)
-            end do
-         end do
-         call cmp_to_fmp (cmp,fmp)
-         call grid_mpole (fmp)
-         call fftfront
-         do k = 1, nfft3
-            do j = 1, nfft2
-               do i = 1, nfft1
-                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
-                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
-               end do
-            end do
-         end do
-         do i = 1, npole
-            do j = 2, 4
-               cmp(j,i) = cmp(j,i) + uind(j-1,i) - uinp(j-1,i)
-            end do
-         end do
-         call cmp_to_fmp (cmp,fmp)
-         call grid_mpole (fmp)
-         call fftfront
-         do i = 1, npole
-            do j = 2, 4
-               cmp(j,i) = cmp(j,i) - uind(j-1,i)
-            end do
-         end do
-      else
-         call cmp_to_fmp (cmp,fmp)
-         call grid_mpole (fmp)
-         call fftfront
-         do k = 1, nfft3
-            do j = 1, nfft2
-               do i = 1, nfft1
-                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
-                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
-               end do
-            end do
-         end do
-      end if
-c
-c     make the scalar summation over reciprocal lattice
-c
-      ntot = nfft1 * nfft2 * nfft3
-      pterm = (pi/aewald)**2
-      volterm = pi * volbox
-      nff = nfft1 * nfft2
-      nf1 = (nfft1+1) / 2
-      nf2 = (nfft2+1) / 2
-      nf3 = (nfft3+1) / 2
-      do i = 1, ntot-1
-         k3 = i/nff + 1
-         j = i - (k3-1)*nff
-         k2 = j/nfft1 + 1
-         k1 = j - (k2-1)*nfft1 + 1
-         m1 = k1 - 1
-         m2 = k2 - 1
-         m3 = k3 - 1
-         if (k1 .gt. nf1)  m1 = m1 - nfft1
-         if (k2 .gt. nf2)  m2 = m2 - nfft2
-         if (k3 .gt. nf3)  m3 = m3 - nfft3
-         r1 = dble(m1)
-         r2 = dble(m2)
-         r3 = dble(m3)
-         h1 = recip(1,1)*r1 + recip(1,2)*r2 + recip(1,3)*r3
-         h2 = recip(2,1)*r1 + recip(2,2)*r2 + recip(2,3)*r3
-         h3 = recip(3,1)*r1 + recip(3,2)*r2 + recip(3,3)*r3
-         hsq = h1*h1 + h2*h2 + h3*h3
-         term = -pterm * hsq
-         expterm = 0.0d0
-         if (term .gt. -50.0d0) then
-            denom = volterm*hsq*bsmod1(k1)*bsmod2(k2)*bsmod3(k3)
-            expterm = exp(term) / denom
-            if (.not. use_bounds) then
-               expterm = expterm * (1.0d0-cos(pi*xbox*sqrt(hsq)))
-            else if (octahedron) then
-               if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
-            end if
-            struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
-     &                  + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
-            eterm = 0.5d0 * electric * expterm * struc2
-            vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
-            vxx = vxx + h1*h1*vterm - eterm
-            vyx = vyx + h2*h1*vterm
-            vzx = vzx + h3*h1*vterm
-            vyy = vyy + h2*h2*vterm - eterm
-            vzy = vzy + h3*h2*vterm
-            vzz = vzz + h3*h3*vterm - eterm
-         end if
-         qfac(k1,k2,k3) = expterm
-      end do
-c
-c     assign just the induced multipoles to PME grid
-c     and perform the 3-D FFT forward transformation
-c
-      if (use_polar .and. poltyp.eq.'DIRECT') then
-         do i = 1, npole
-            do j = 1, 10
-               cmp(j,i) = 0.0d0
-            end do
-            do j = 2, 4
-               cmp(j,i) = uinp(j-1,i)
-            end do
-         end do
-         call cmp_to_fmp (cmp,fmp)
-         call grid_mpole (fmp)
-         call fftfront
-         do k = 1, nfft3
-            do j = 1, nfft2
-               do i = 1, nfft1
-                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
-                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
-               end do
-            end do
-         end do
-         do i = 1, npole
-            do j = 2, 4
-               cmp(j,i) = uind(j-1,i)
-            end do
-         end do
-         call cmp_to_fmp (cmp,fmp)
-         call grid_mpole (fmp)
-         call fftfront
-         do i = 1, npole
-            cmp(1,i) = rpole(1,i)
-            cmp(2,i) = rpole(2,i)
-            cmp(3,i) = rpole(3,i)
-            cmp(4,i) = rpole(4,i)
-            cmp(5,i) = rpole(5,i)
-            cmp(6,i) = rpole(9,i)
-            cmp(7,i) = rpole(13,i)
-            cmp(8,i) = 2.0d0 * rpole(6,i)
-            cmp(9,i) = 2.0d0 * rpole(7,i)
-            cmp(10,i) = 2.0d0 * rpole(10,i)
-         end do
-c
-c     make the scalar summation over reciprocal lattice
-c
-         do i = 1, ntot-1
-            k3 = i/nff + 1
-            j = i - (k3-1)*nff
-            k2 = j/nfft1 + 1
-            k1 = j - (k2-1)*nfft1 + 1
-            m1 = k1 - 1
-            m2 = k2 - 1
-            m3 = k3 - 1
-            if (k1 .gt. nf1)  m1 = m1 - nfft1
-            if (k2 .gt. nf2)  m2 = m2 - nfft2
-            if (k3 .gt. nf3)  m3 = m3 - nfft3
-            r1 = dble(m1)
-            r2 = dble(m2)
-            r3 = dble(m3)
-            h1 = recip(1,1)*r1 + recip(1,2)*r2 + recip(1,3)*r3
-            h2 = recip(2,1)*r1 + recip(2,2)*r2 + recip(2,3)*r3
-            h3 = recip(3,1)*r1 + recip(3,2)*r2 + recip(3,3)*r3
-            hsq = h1*h1 + h2*h2 + h3*h3
-            term = -pterm * hsq
-            expterm = 0.0d0
-            if (term .gt. -50.0d0) then
-               denom = volterm*hsq*bsmod1(k1)*bsmod2(k2)*bsmod3(k3)
-               expterm = exp(term) / denom
-               if (.not. use_bounds) then
-                  expterm = expterm * (1.0d0-cos(pi*xbox*sqrt(hsq)))
-               else if (octahedron) then
-                  if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
-               end if
-               struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
-     &                     + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
-               eterm = 0.5d0 * electric * expterm * struc2
-               vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
-               vxx = vxx - h1*h1*vterm + eterm
-               vyx = vyx - h2*h1*vterm
-               vzx = vzx - h3*h1*vterm
-               vyy = vyy - h2*h2*vterm + eterm
-               vzy = vzy - h3*h2*vterm
-               vzz = vzz - h3*h3*vterm + eterm
-            end if
-         end do
-      end if
-c
-c     perform deallocation of some local arrays
-c
-      deallocate (qgrip)
-c
 c     transform permanent multipoles without induced dipoles
 c
       if (use_polar) then
@@ -6694,6 +6601,202 @@ c
             enddo
          enddo
 c OPT IMPLEMENTATION
+
+
+
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+c
+c     assign permanent and induced multipoles to PME grid
+c     and perform the 3-D FFT forward transformation
+c
+      if (use_polar) then
+         do i = 1, npole
+            do j = 2, 4
+               cmp(j,i) = cmp(j,i) + uinp(j-1,i)
+            end do
+         end do
+         call cmp_to_fmp (cmp,fmp)
+         call grid_mpole (fmp)
+         call fftfront
+         do k = 1, nfft3
+            do j = 1, nfft2
+               do i = 1, nfft1
+                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
+                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
+               end do
+            end do
+         end do
+         do i = 1, npole
+            do j = 2, 4
+               cmp(j,i) = cmp(j,i) + uind(j-1,i) - uinp(j-1,i)
+            end do
+         end do
+         call cmp_to_fmp (cmp,fmp)
+         call grid_mpole (fmp)
+         call fftfront
+         do i = 1, npole
+            do j = 2, 4
+               cmp(j,i) = cmp(j,i) - uind(j-1,i)
+            end do
+         end do
+      else
+         call cmp_to_fmp (cmp,fmp)
+         call grid_mpole (fmp)
+         call fftfront
+         do k = 1, nfft3
+            do j = 1, nfft2
+               do i = 1, nfft1
+                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
+                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
+               end do
+            end do
+         end do
+      end if
+c
+c     make the scalar summation over reciprocal lattice
+c
+      call scalarsum(qgrid,qgrip,1.0d0,vxx,vyx,vzx,vyy,vzy,vzz)
+CCCC      ntot = nfft1 * nfft2 * nfft3
+CCCC      pterm = (pi/aewald)**2
+CCCC      volterm = pi * volbox
+CCCC      nff = nfft1 * nfft2
+CCCC      nf1 = (nfft1+1) / 2
+CCCC      nf2 = (nfft2+1) / 2
+CCCC      nf3 = (nfft3+1) / 2
+CCCC      do i = 1, ntot-1
+CCCC         k3 = i/nff + 1
+CCCC         j = i - (k3-1)*nff
+CCCC         k2 = j/nfft1 + 1
+CCCC         k1 = j - (k2-1)*nfft1 + 1
+CCCC         m1 = k1 - 1
+CCCC         m2 = k2 - 1
+CCCC         m3 = k3 - 1
+CCCC         if (k1 .gt. nf1)  m1 = m1 - nfft1
+CCCC         if (k2 .gt. nf2)  m2 = m2 - nfft2
+CCCC         if (k3 .gt. nf3)  m3 = m3 - nfft3
+CCCC         r1 = dble(m1)
+CCCC         r2 = dble(m2)
+CCCC         r3 = dble(m3)
+CCCC         h1 = recip(1,1)*r1 + recip(1,2)*r2 + recip(1,3)*r3
+CCCC         h2 = recip(2,1)*r1 + recip(2,2)*r2 + recip(2,3)*r3
+CCCC         h3 = recip(3,1)*r1 + recip(3,2)*r2 + recip(3,3)*r3
+CCCC         hsq = h1*h1 + h2*h2 + h3*h3
+CCCC         term = -pterm * hsq
+CCCC         expterm = 0.0d0
+CCCC         if (term .gt. -50.0d0) then
+CCCC            denom = volterm*hsq*bsmod1(k1)*bsmod2(k2)*bsmod3(k3)
+CCCC            expterm = exp(term) / denom
+CCCC            if (.not. use_bounds) then
+CCCC               expterm = expterm * (1.0d0-cos(pi*xbox*sqrt(hsq)))
+CCCC            else if (octahedron) then
+CCCC               if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
+CCCC            end if
+CCCC            struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
+CCCC     &                  + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
+CCCC            eterm = 0.5d0 * electric * expterm * struc2
+CCCC            vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
+CCCC            vxx = vxx + h1*h1*vterm - eterm
+CCCC            vyx = vyx + h2*h1*vterm
+CCCC            vzx = vzx + h3*h1*vterm
+CCCC            vyy = vyy + h2*h2*vterm - eterm
+CCCC            vzy = vzy + h3*h2*vterm
+CCCC            vzz = vzz + h3*h3*vterm - eterm
+CCCC         end if
+CCCC         qfac(k1,k2,k3) = expterm
+CCCC      end do
+c
+c     assign just the induced multipoles to PME grid
+c     and perform the 3-D FFT forward transformation
+c
+      if (use_polar .and. poltyp.eq.'DIRECT') then
+         do i = 1, npole
+            do j = 1, 10
+               cmp(j,i) = 0.0d0
+            end do
+            do j = 2, 4
+               cmp(j,i) = uinp(j-1,i)
+            end do
+         end do
+         call cmp_to_fmp (cmp,fmp)
+         call grid_mpole (fmp)
+         call fftfront
+         do k = 1, nfft3
+            do j = 1, nfft2
+               do i = 1, nfft1
+                  qgrip(1,i,j,k) = qgrid(1,i,j,k)
+                  qgrip(2,i,j,k) = qgrid(2,i,j,k)
+               end do
+            end do
+         end do
+         do i = 1, npole
+            do j = 2, 4
+               cmp(j,i) = uind(j-1,i)
+            end do
+         end do
+         call cmp_to_fmp (cmp,fmp)
+         call grid_mpole (fmp)
+         call fftfront
+         do i = 1, npole
+            cmp(1,i) = rpole(1,i)
+            cmp(2,i) = rpole(2,i)
+            cmp(3,i) = rpole(3,i)
+            cmp(4,i) = rpole(4,i)
+            cmp(5,i) = rpole(5,i)
+            cmp(6,i) = rpole(9,i)
+            cmp(7,i) = rpole(13,i)
+            cmp(8,i) = 2.0d0 * rpole(6,i)
+            cmp(9,i) = 2.0d0 * rpole(7,i)
+            cmp(10,i) = 2.0d0 * rpole(10,i)
+         end do
+c
+c     make the scalar summation over reciprocal lattice
+c
+         do i = 1, ntot-1
+            k3 = i/nff + 1
+            j = i - (k3-1)*nff
+            k2 = j/nfft1 + 1
+            k1 = j - (k2-1)*nfft1 + 1
+            m1 = k1 - 1
+            m2 = k2 - 1
+            m3 = k3 - 1
+            if (k1 .gt. nf1)  m1 = m1 - nfft1
+            if (k2 .gt. nf2)  m2 = m2 - nfft2
+            if (k3 .gt. nf3)  m3 = m3 - nfft3
+            r1 = dble(m1)
+            r2 = dble(m2)
+            r3 = dble(m3)
+            h1 = recip(1,1)*r1 + recip(1,2)*r2 + recip(1,3)*r3
+            h2 = recip(2,1)*r1 + recip(2,2)*r2 + recip(2,3)*r3
+            h3 = recip(3,1)*r1 + recip(3,2)*r2 + recip(3,3)*r3
+            hsq = h1*h1 + h2*h2 + h3*h3
+            term = -pterm * hsq
+            expterm = 0.0d0
+            if (term .gt. -50.0d0) then
+               denom = volterm*hsq*bsmod1(k1)*bsmod2(k2)*bsmod3(k3)
+               expterm = exp(term) / denom
+               if (.not. use_bounds) then
+                  expterm = expterm * (1.0d0-cos(pi*xbox*sqrt(hsq)))
+               else if (octahedron) then
+                  if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
+               end if
+               struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
+     &                     + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
+               eterm = 0.5d0 * electric * expterm * struc2
+               vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
+               vxx = vxx - h1*h1*vterm + eterm
+               vyx = vyx - h2*h1*vterm
+               vzx = vzx - h3*h1*vterm
+               vyy = vyy - h2*h2*vterm + eterm
+               vzy = vzy - h3*h2*vterm
+               vzz = vzz - h3*h3*vterm + eterm
+            end if
+         end do
+      end if
+c
+c     perform deallocation of some local arrays
+c
+      deallocate (qgrip)
+CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 c
 c     increment the internal virial tensor components
 c
@@ -6721,4 +6824,95 @@ c
       deallocate (fphidp)
       deallocate (cphi)
       return
+      end
+
+
+      subroutine scalarsum(gridd,gridp,scalefac,vxx,vyx,vzx,vyy,vzy,vzz)
+      use pme
+      use chgpot
+      use ewald
+      use boxes
+      use bound
+      use math
+      implicit none
+      integer ntot,nff
+      real*8 scalefac
+      real*8 vxx,vyx,vzx
+      real*8 vyy,vzy,vzz
+      real*8 myvxx,myvyx,myvzx
+      real*8 myvyy,myvzy,myvzz
+      real*8 volterm,denom
+      real*8 hsq,expterm
+      real*8 term,pterm
+      real*8 vterm,struc2,eterm
+      real*8 r1,r2,r3
+      real*8 h1,h2,h3
+      real*8 gridd(2,nfft1,nfft2,nfft3), gridp(2,nfft1,nfft2,nfft3)
+      integer k1,k2,k3
+      integer m1,m2,m3
+      integer nf1,nf2,nf3
+      integer i,j,k
+c
+c     make the scalar summation over reciprocal lattice
+c
+      ntot = nfft1 * nfft2 * nfft3
+      pterm = (pi/aewald)**2
+      volterm = pi * volbox
+      nff = nfft1 * nfft2
+      nf1 = (nfft1+1) / 2
+      nf2 = (nfft2+1) / 2
+      nf3 = (nfft3+1) / 2
+      myvxx = 0d0
+      myvyx = 0d0
+      myvzx = 0d0
+      myvyy = 0d0
+      myvzy = 0d0
+      myvzz = 0d0
+      do i = 1, ntot-1
+         k3 = i/nff + 1
+         j = i - (k3-1)*nff
+         k2 = j/nfft1 + 1
+         k1 = j - (k2-1)*nfft1 + 1
+         m1 = k1 - 1
+         m2 = k2 - 1
+         m3 = k3 - 1
+         if (k1 .gt. nf1)  m1 = m1 - nfft1
+         if (k2 .gt. nf2)  m2 = m2 - nfft2
+         if (k3 .gt. nf3)  m3 = m3 - nfft3
+         r1 = dble(m1)
+         r2 = dble(m2)
+         r3 = dble(m3)
+         h1 = recip(1,1)*r1 + recip(1,2)*r2 + recip(1,3)*r3
+         h2 = recip(2,1)*r1 + recip(2,2)*r2 + recip(2,3)*r3
+         h3 = recip(3,1)*r1 + recip(3,2)*r2 + recip(3,3)*r3
+         hsq = h1*h1 + h2*h2 + h3*h3
+         term = -pterm * hsq
+         expterm = 0.0d0
+         if (term .gt. -50.0d0) then
+            denom = volterm*hsq*bsmod1(k1)*bsmod2(k2)*bsmod3(k3)
+            expterm = exp(term) / denom
+            if (.not. use_bounds) then
+               expterm = expterm * (1.0d0-cos(pi*xbox*sqrt(hsq)))
+            else if (octahedron) then
+               if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
+            end if
+            struc2 = gridd(1,k1,k2,k3)*gridp(1,k1,k2,k3)
+     &                  + gridd(2,k1,k2,k3)*gridp(2,k1,k2,k3)
+            eterm = 0.5d0 * electric * expterm * struc2
+            vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
+            myvxx = myvxx + h1*h1*vterm - eterm
+            myvyx = myvyx + h2*h1*vterm
+            myvzx = myvzx + h3*h1*vterm
+            myvyy = myvyy + h2*h2*vterm - eterm
+            myvzy = myvzy + h3*h2*vterm
+            myvzz = myvzz + h3*h3*vterm - eterm
+         end if
+         qfac(k1,k2,k3) = expterm
+      end do
+      vxx = vxx + scalefac*myvxx 
+      vyx = vyx + scalefac*myvyx 
+      vzx = vzx + scalefac*myvzx 
+      vyy = vyy + scalefac*myvyy 
+      vzy = vzy + scalefac*myvzy 
+      vzz = vzz + scalefac*myvzz 
       end

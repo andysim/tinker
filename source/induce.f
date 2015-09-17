@@ -262,9 +262,6 @@ c
             uinp(j,i) = udirp(j,i)
          end do
       end do
-c
-c     set tolerances for computation of mutual induced dipoles
-c
 
 c OPT IMPLEMENTATION
       if (poltyp(1:3) .eq. 'OPT') then
@@ -312,6 +309,9 @@ c OPT IMPLEMENTATION
          !   write(*,'(3F16.10)') uinp(:,i)
          !enddo
       endif
+c
+c     set tolerances for computation of mutual induced dipoles
+c
 c OPT IMPLEMENTATION
       if (poltyp .eq. 'MUTUAL' .or. dofit) then
 c OPT IMPLEMENTATION
@@ -2637,7 +2637,10 @@ c
 c
 c     perform dynamic allocation of some local arrays
 c
-      if (poltyp .eq. 'MUTUAL') then
+c OPT IMPLEMENTATION
+c      if (poltyp .eq. 'MUTUAL') then
+       if (poltyp .eq. 'MUTUAL' .or. poltyp(1:3) .eq. 'OPT') then
+c OPT IMPLEMENTATION
          allocate (ilocal(2,maxlocal))
          allocate (dlocal(6,maxlocal))
       end if
@@ -2803,7 +2806,10 @@ c
 c
 c     find terms needed later to compute mutual polarization
 c
-               if (poltyp .eq. 'MUTUAL') then
+c OPT IMPLEMENTATION
+c              if (poltyp .eq. 'MUTUAL') then
+               if (poltyp .eq. 'MUTUAL' .or. poltyp(1:3).eq.'OPT') then
+c OPT IMPLEMENTATION
                   bcn(1) = bn(1) - (1.0d0-scale3*uscale(kk))*rr3
                   bcn(2) = bn(2) - 3.0d0*(1.0d0-scale5*uscale(kk))*rr5
                   nlocal = nlocal + 1
@@ -2881,7 +2887,10 @@ c
       toffset0 = toffset0 + nlocal
       ntpair = toffset0
 !$OMP END CRITICAL
-      if (poltyp .eq. 'MUTUAL') then
+c OPT IMPLEMENTATION
+c     if (poltyp .eq. 'MUTUAL') then
+      if (poltyp .eq. 'MUTUAL' .or. poltyp(1:3).eq.'OPT') then
+c OPT IMPLEMENTATION
          k = toffset(tid)
          do i = 1, nlocal
             m = k + i

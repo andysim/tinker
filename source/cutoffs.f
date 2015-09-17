@@ -261,7 +261,10 @@ c
          allocate (xmold(n))
          allocate (ymold(n))
          allocate (zmold(n))
-         if (poltyp .eq. 'MUTUAL') then
+c OPT IMPLEMENTATION
+c         if (poltyp .eq. 'MUTUAL') then
+         if (poltyp .eq. 'MUTUAL' .or. poltyp(1:3) .eq. 'OPT') then
+c OPT IMPLEMENTATION
             if (allocated(tindex))  deallocate (tindex)
             if (allocated(tdipdip))  deallocate (tdipdip)
             allocate (tindex(2,n*maxelst))
