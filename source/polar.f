@@ -26,7 +26,6 @@ c     maxpt     the maximum allowed order of perturbation theory
 c     maxord    the maximum order or perturbation theory used in this calculation
 c     ptcoefs   the coefficients of each (partial contribution) term in the PT expantion
 c     ptcoefsf  the coefficients of each (full, i.e., summed) term in the PT expansion
-c     savegrids whether to save the FFT grids during dipole formation, for later use
 c     uindgridf the fourier space representation of µd(0), µd(1), µd(2), etc.
 c     uinpgridf the fourier space representation of µp(0), µp(1), µp(2), etc.
 c     ptfphid   the fractional coordinate rec space potential due to µd(0), µd(1), µd(2), etc.
@@ -52,7 +51,6 @@ c OPT IMPLEMENTATION
       integer, parameter :: MAXPT = 8
       integer ptmaxord
       real*8 :: ptcoefs(0:MAXPT), ptcoefsf(0:MAXPT)
-      logical, parameter :: savegrids = .true.
       logical :: dofit = .false.
       integer :: includeuinp = 1
       integer :: ptpointer

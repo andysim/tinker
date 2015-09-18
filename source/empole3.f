@@ -37,12 +37,10 @@ c     choose the method for summing over multipole interactions
 c
       if (use_ewald) then
 c OPT IMPLEMENTATION
-         if (savegrids) then
-            if (allocated(fphiperm))  deallocate (fphiperm)
-            if (allocated(permgridf))  deallocate (permgridf)
-            allocate(fphiperm(20,npole))
-            allocate(permgridf(2,nfft1,nfft2,nfft3))
-         endif
+         if (allocated(fphiperm))  deallocate (fphiperm)
+         if (allocated(permgridf))  deallocate (permgridf)
+         allocate(fphiperm(20,npole))
+         allocate(permgridf(2,nfft1,nfft2,nfft3))
          if (poltyp(1:3) .eq. 'OPT') then
             if (allocated(ptfphip))  deallocate (ptfphip)
             if (allocated(ptfphid))  deallocate (ptfphid)

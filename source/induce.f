@@ -1957,9 +1957,7 @@ c
       call grid_mpole (fmp)
       call fftfront
 c OPT IMPLEMENTATION
-      if (savegrids) then
-        permgridf = qgrid
-      endif
+      permgridf = qgrid
 c OPT IMPLEMENTATION
 c
 c     make the scalar summation over reciprocal lattice
@@ -2029,9 +2027,7 @@ c
       call fftback
       call fphi_mpole (fphi)
 c OPT IMPLEMENTATION
-      if (savegrids) then
-        fphiperm = fphi
-      endif
+      fphiperm = fphi
 c OPT IMPLEMENTATION
 c
 c     convert the field from fractional to Cartesian
