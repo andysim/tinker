@@ -6425,14 +6425,6 @@ c OPT IMPLEMENTATION
       real*8, allocatable :: fphidp(:,:)
       real*8, allocatable :: cphi(:,:)
       real*8, allocatable :: qgrip(:,:,:,:)
-      real*8 myvxx,myvyx,myvzx
-      real*8 myvyy,myvzy,myvzz
-      real*8 myvxx2,myvyx2,myvzx2
-      real*8 myvyy2,myvzy2,myvzz2
-      real*8 myvxx3,myvyx3,myvzx3
-      real*8 myvyy3,myvzy3,myvzz3
-      real*8 myvxx4,myvyx4,myvzx4
-      real*8 myvyy4,myvzy4,myvzz4
 c
 c     derivative indices into the fphi and fphidp arrays
 c
@@ -6467,30 +6459,6 @@ c
       vyy = 0.0d0
       vzy = 0.0d0
       vzz = 0.0d0
-      myvxx = 0.0d0
-      myvyx = 0.0d0
-      myvzx = 0.0d0
-      myvyy = 0.0d0
-      myvzy = 0.0d0
-      myvzz = 0.0d0
-      myvxx2 = 0.0d0
-      myvyx2 = 0.0d0
-      myvzx2 = 0.0d0
-      myvyy2 = 0.0d0
-      myvzy2 = 0.0d0
-      myvzz2 = 0.0d0
-      myvxx3 = 0.0d0
-      myvyx3 = 0.0d0
-      myvzx3 = 0.0d0
-      myvyy3 = 0.0d0
-      myvzy3 = 0.0d0
-      myvzz3 = 0.0d0
-      myvxx4 = 0.0d0
-      myvyx4 = 0.0d0
-      myvzx4 = 0.0d0
-      myvyy4 = 0.0d0
-      myvzy4 = 0.0d0
-      myvzz4 = 0.0d0
 
 c
 c     get the fractional to Cartesian transformation matrix
@@ -6724,10 +6692,6 @@ c
 c
 c        permanent multipole contribution to the internal virial
 c
-         write(*,*) "GF TERMS"
-         write(*,'(3F16.10)') vxx, vyx, vzx
-         write(*,'(3F16.10)') vyx, vyy, vzy
-         write(*,'(3F16.10)') vzx, vzy, vzz
          do i = 1, npole
             vxx = vxx - cmp(2,i)*cphi(2,i) - 2.0d0*cmp(5,i)*cphi(5,i)
      &                - cmp(8,i)*cphi(8,i) - cmp(9,i)*cphi(9,i)
@@ -6747,29 +6711,7 @@ c
      &                - 0.5d0*(cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
             vzz = vzz - cmp(4,i)*cphi(4,i) - 2.0d0*cmp(7,i)*cphi(7,i)
      &                - cmp(9,i)*cphi(9,i) - cmp(10,i)*cphi(10,i)
-           myvxx = myvxx - cmp(2,i)*cphi(2,i) - 2.0d0*cmp(5,i)*cphi(5,i)
-     &               - cmp(8,i)*cphi(8,i) - cmp(9,i)*cphi(9,i)
-           myvyx = myvyx - 0.5d0*(cmp(3,i)*cphi(2,i)+cmp(2,i)*cphi(3,i))
-     &               - (cmp(5,i)+cmp(6,i))*cphi(8,i)
-     &               - 0.5d0*cmp(8,i)*(cphi(5,i)+cphi(6,i))
-     &               - 0.5d0*(cmp(9,i)*cphi(10,i)+cmp(10,i)*cphi(9,i))
-           myvzx = myvzx - 0.5d0*(cmp(4,i)*cphi(2,i)+cmp(2,i)*cphi(4,i))
-     &               - (cmp(5,i)+cmp(7,i))*cphi(9,i)
-     &               - 0.5d0*cmp(9,i)*(cphi(5,i)+cphi(7,i))
-     &               - 0.5d0*(cmp(8,i)*cphi(10,i)+cmp(10,i)*cphi(8,i))
-           myvyy = myvyy - cmp(3,i)*cphi(3,i) - 2.0d0*cmp(6,i)*cphi(6,i)
-     &               - cmp(8,i)*cphi(8,i) - cmp(10,i)*cphi(10,i)
-           myvzy = myvzy - 0.5d0*(cmp(4,i)*cphi(3,i)+cmp(3,i)*cphi(4,i))
-     &               - (cmp(6,i)+cmp(7,i))*cphi(10,i)
-     &               - 0.5d0*cmp(10,i)*(cphi(6,i)+cphi(7,i))
-     &               - 0.5d0*(cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
-           myvzz = myvzz - cmp(4,i)*cphi(4,i) - 2.0d0*cmp(7,i)*cphi(7,i)
-     &               - cmp(9,i)*cphi(9,i) - cmp(10,i)*cphi(10,i)
          end do
-         write(*,*) "perm probe terms"
-         write(*,'(3F16.10)') myvxx, myvyx, myvzx
-         write(*,'(3F16.10)') myvyx, myvyy, myvzy
-         write(*,'(3F16.10)') myvzx, myvzy, myvzz
 c
 c        complete the transformation of the induced dipole grid
 c
@@ -6924,37 +6866,6 @@ c
      &                     +cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
             vzz = vzz - 2.0d0*cmp(7,i)*cphi(7,i) - cmp(9,i)*cphi(9,i)
      &                - cmp(10,i)*cphi(10,i)
-         myvxx2 = myvxx2 - cphi(2,i)*cmp(2,i)
-         myvxx3 = myvxx3 - 0.5d0*(cphim(2)*(uind(1,i)+uinp(1,i)))
-         myvyx2 = myvyx2 - 0.5d0*(cphi(2,i)*cmp(3,i)+cphi(3,i)*cmp(2,i))
-         myvyx3 = myvyx3 - 0.25d0*(cphim(2)*(uind(2,i)+uinp(2,i))
-     &                      +cphim(3)*(uind(1,i)+uinp(1,i)))
-         myvzx2 = myvzx2 - 0.5d0*(cphi(2,i)*cmp(4,i)+cphi(4,i)*cmp(2,i))
-         myvzx3 = myvzx3 - 0.25d0*(cphim(2)*(uind(3,i)+uinp(3,i))
-     &                      +cphim(4)*(uind(1,i)+uinp(1,i)))
-         myvyy2 = myvyy2 - cphi(3,i)*cmp(3,i)
-         myvyy3 = myvyy3 - 0.5d0*(cphim(3)*(uind(2,i)+uinp(2,i)))
-         myvzy2 = myvzy2 - 0.5d0*(cphi(3,i)*cmp(4,i)+cphi(4,i)*cmp(3,i))
-         myvzy3 = myvzy3 - 0.25d0*(cphim(3)*(uind(3,i)+uinp(3,i))
-     &                      +cphim(4)*(uind(2,i)+uinp(2,i)))
-         myvzz2 = myvzz2 - cphi(4,i)*cmp(4,i)
-         myvzz3 = myvzz3 - 0.5d0*(cphim(4)*(uind(3,i)+uinp(3,i)))
-
-         myvxx2 = myvxx2 - 2.0d0*cmp(5,i)*cphi(5,i) - cmp(8,i)*cphi(8,i)
-     &             - cmp(9,i)*cphi(9,i)
-         myvyx2 = myvyx2 - (cmp(5,i)+cmp(6,i))*cphi(8,i)
-     &             - 0.5d0*(cmp(8,i)*(cphi(6,i)+cphi(5,i))
-     &                  +cmp(9,i)*cphi(10,i)+cmp(10,i)*cphi(9,i))
-         myvzx2 = myvzx2 - (cmp(5,i)+cmp(7,i))*cphi(9,i)
-     &             - 0.5d0*(cmp(9,i)*(cphi(5,i)+cphi(7,i))
-     &                  +cmp(8,i)*cphi(10,i)+cmp(10,i)*cphi(8,i))
-         myvyy2 = myvyy2 - 2.0d0*cmp(6,i)*cphi(6,i) - cmp(8,i)*cphi(8,i)
-     &             - cmp(10,i)*cphi(10,i)
-         myvzy2 = myvzy2 - (cmp(6,i)+cmp(7,i))*cphi(10,i)
-     &             - 0.5d0*(cmp(10,i)*(cphi(6,i)+cphi(7,i))
-     &                  +cmp(8,i)*cphi(9,i)+cmp(9,i)*cphi(8,i))
-         myvzz2 = myvzz2 - 2.0d0*cmp(7,i)*cphi(7,i) - cmp(9,i)*cphi(9,i)
-     &             - cmp(10,i)*cphi(10,i)
             if (poltyp .eq. 'MUTUAL') then
                vxx = vxx - 0.5d0*(cphid(2)*uinp(1,i)+cphip(2)*uind(1,i))
                vyx = vyx - 0.25d0*(cphid(2)*uinp(2,i)+cphip(2)*uind(2,i)
@@ -6965,29 +6876,8 @@ c
                vzy = vzy - 0.25d0*(cphid(3)*uinp(3,i)+cphip(3)*uind(3,i)
      &                           +cphid(4)*uinp(2,i)+cphip(4)*uind(2,i))
                vzz = vzz - 0.5d0*(cphid(4)*uinp(3,i)+cphip(4)*uind(3,i))
-         myvxx4 = myvxx4 - 0.5d0*(cphid(2)*uinp(1,i)+cphip(2)*uind(1,i))
-         myvyx4 = myvyx4 - 0.25d0*(cphid(2)*uinp(2,i)+cphip(2)*uind(2,i)
-     &                     +cphid(3)*uinp(1,i)+cphip(3)*uind(1,i))
-         myvzx4 = myvzx4 - 0.25d0*(cphid(2)*uinp(3,i)+cphip(2)*uind(3,i)
-     &                     +cphid(4)*uinp(1,i)+cphip(4)*uind(1,i))
-         myvyy4 = myvyy4 - 0.5d0*(cphid(3)*uinp(2,i)+cphip(3)*uind(2,i))
-         myvzy4 = myvzy4 - 0.25d0*(cphid(3)*uinp(3,i)+cphip(3)*uind(3,i)
-     &                     +cphid(4)*uinp(2,i)+cphip(4)*uind(2,i))
-         myvzz4 = myvzz4 - 0.5d0*(cphid(4)*uinp(3,i)+cphip(4)*uind(3,i))
             end if
          end do
-         write(*,*) "ind probing perm"
-         write(*,'(3F16.10)') myvxx3, myvyx3, myvzx3
-         write(*,'(3F16.10)') myvyx3, myvyy3, myvzy3
-         write(*,'(3F16.10)') myvzx3, myvzy3, myvzz3
-         write(*,*) "perm probing ind"
-         write(*,'(3F16.10)') myvxx2, myvyx2, myvzx2
-         write(*,'(3F16.10)') myvyx2, myvyy2, myvzy2
-         write(*,'(3F16.10)') myvzx2, myvzy2, myvzz2
-         write(*,*) "ind probing ind"
-         write(*,'(3F16.10)') myvxx4, myvyx4, myvzx4
-         write(*,'(3F16.10)') myvyx4, myvyy4, myvzy4
-         write(*,'(3F16.10)') myvzx4, myvzy4, myvzz4
 c
 c        now add in the PT mutual terms
 c
@@ -7038,24 +6928,32 @@ c
      &                   recip(2,1)*f1+recip(2,2)*f2+recip(2,3)*f3
                      frc(3,i) =
      &                   recip(3,1)*f1+recip(3,2)*f2+recip(3,3)*f3
-                     vxx = vxx - 0.50d0*c*(fphid(2,i)*fuinp(1,i)
-     &                                    +fphip(2,i)*fuind(1,i))
-                     vyx = vyx - 0.25d0*c*(fphid(2,i)*fuinp(2,i)
-     &                                    +fphip(2,i)*fuind(2,i)
-     &                                    +fphid(3,i)*fuinp(1,i)
-     &                                    +fphip(3,i)*fuind(1,i))
-                     vzx = vzx - 0.25d0*c*(fphid(2,i)*fuinp(3,i)
-     &                                    +fphip(2,i)*fuind(3,i)
-     &                                    +fphid(4,i)*fuinp(1,i)
-     &                                    +fphip(4,i)*fuind(1,i))
-                     vyy = vyy - 0.50d0*c*(fphid(3,i)*fuinp(2,i)
-     &                                    +fphip(3,i)*fuind(2,i))
-                     vzy = vzy - 0.25d0*c*(fphid(3,i)*fuinp(3,i)
-     &                                    +fphip(3,i)*fuind(3,i)
-     &                                    +fphid(4,i)*fuinp(2,i)
-     &                                    +fphip(4,i)*fuind(2,i))
-                     vzz = vzz - 0.50d0*c*(fphid(4,i)*fuinp(3,i)
-     &                                    +fphip(4,i)*fuind(3,i))
+                     do j = 2, 4
+                        cphid(j) = 0.0d0
+                        cphip(j) = 0.0d0
+                        do k = 2, 4
+                           cphid(j) = cphid(j) + ftc(j,k)*fphid(k,i)
+                           cphip(j) = cphip(j) + ftc(j,k)*fphip(k,i)
+                        end do
+                     end do
+                     vxx = vxx - 0.50d0*c*(cphid(2)*ptuinp(1,i,m)
+     &                                    +cphip(2)*ptuind(1,i,m))
+                     vyx = vyx - 0.25d0*c*(cphid(2)*ptuinp(2,i,m)
+     &                                    +cphip(2)*ptuind(2,i,m)
+     &                                    +cphid(3)*ptuinp(1,i,m)
+     &                                    +cphip(3)*ptuind(1,i,m))
+                     vzx = vzx - 0.25d0*c*(cphid(2)*ptuinp(3,i,m)
+     &                                    +cphip(2)*ptuind(3,i,m)
+     &                                    +cphid(4)*ptuinp(1,i,m)
+     &                                    +cphip(4)*ptuind(1,i,m))
+                     vyy = vyy - 0.50d0*c*(cphid(3)*ptuinp(2,i,m)
+     &                                    +cphip(3)*ptuind(2,i,m))
+                     vzy = vzy - 0.25d0*c*(cphid(3)*ptuinp(3,i,m)
+     &                                    +cphip(3)*ptuind(3,i,m)
+     &                                    +cphid(4)*ptuinp(2,i,m)
+     &                                    +cphip(4)*ptuind(2,i,m))
+                     vzz = vzz - 0.50d0*c*(cphid(4)*ptuinp(3,i,m)
+     &                                    +cphip(4)*ptuind(3,i,m))
                   end do
                   do i = 1, npole
                      ii = ipole(i)
@@ -7238,6 +7136,19 @@ c
       return
       end
 
+c
+c
+c     ##################################################################
+c     ##                                                              ##
+c     ##  subroutine ssum  --  structure factor contribution to the   ##
+c     ##                       reciprocal space virial                ##
+c     ##                                                              ##
+c     ##################################################################
+c
+c
+c     "ssum" evaluates the structure factor contribution to the reciprocal
+c     space virial, from the product S(m)S(-m) evaluated on the PME grid
+c     and builds the gfac "influence function" needed in convolutions.
       subroutine ssum(str2,vxx,vyx,vzx,vyy,vzy,vzz)
       use pme
       use chgpot

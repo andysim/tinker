@@ -2993,7 +2993,7 @@ c       Save the p and d grids separately.  This could use real->complex FFT
            do j = 1, nfft2
               do i = 1, nfft1
                  uinpgridf(1,i,j,k,ptpointer) = qgrid(2,i,j,k)
-                 uinpgridf(2,i,j,k,ptpointer) = qgrid(1,i,j,k)
+                 uinpgridf(2,i,j,k,ptpointer) = -qgrid(1,i,j,k)
               end do
            end do
         end do
