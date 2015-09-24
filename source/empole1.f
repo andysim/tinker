@@ -770,21 +770,27 @@ c                 now add in the PT mutual terms
                       gfd = 0.5d0 * (rr5*scip2*scale3i
      &                     - rr7*(scip3*sci4+sci3*scip4)*scale5i)
                       temp5 = 0.5d0 * rr5 * scale5i
-                      ftmtmp(1) = -gfd*xr - temp5
+                      ftmtmp(1) = gfd*xr + temp5
      &                        * (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
      &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
-                      ftmtmp(2) = -gfd*yr - temp5
+                      ftmtmp(2) = gfd*yr + temp5
      &                        * (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
      &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
-                      ftmtmp(3) = -gfd*zr - temp5
+                      ftmtmp(3) = gfd*zr + temp5
      &                        * (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
      &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      temp3 = 0.5d0 * rr3 * uscale(kk) * scip2
+                      temp5 = -0.5d0 * rr5 * uscale(kk)
+     &                           * (sci3*scip4+scip3*sci4)
+                      findmp(1) = temp3*ddsc3(1) + temp5*ddsc5(1)
+                      findmp(2) = temp3*ddsc3(2) + temp5*ddsc5(2)
+                      findmp(3) = temp3*ddsc3(3) + temp5*ddsc5(3)
                       ftm2i(1) = ftm2i(1) +
-     &                        ptcoefs(o)*(ftmtmp(1)-fdir(1)-findmp(1))
+     &                        ptcoefs(o)*(ftmtmp(1)-findmp(1))
                       ftm2i(2) = ftm2i(2) +
-     &                        ptcoefs(o)*(ftmtmp(2)-fdir(2)-findmp(2))
+     &                        ptcoefs(o)*(ftmtmp(2)-findmp(2))
                       ftm2i(3) = ftm2i(3) +
-     &                        ptcoefs(o)*(ftmtmp(3)-fdir(3)-findmp(3))
+     &                        ptcoefs(o)*(ftmtmp(3)-findmp(3))
                    enddo
                  enddo
 c OPT IMPLEMENTATION
@@ -2498,21 +2504,27 @@ c                 now add in the PT mutual terms
                       gfd = 0.5d0 * (rr5*scip2*scale3i
      &                     - rr7*(scip3*sci4+sci3*scip4)*scale5i)
                       temp5 = 0.5d0 * rr5 * scale5i
-                      ftmtmp(1) = -gfd*xr - temp5
+                      ftmtmp(1) = gfd*xr + temp5
      &                        * (sci4*ptuinp(1,i,l)+scip4*ptuind(1,i,l)
      &                          +sci3*ptuinp(1,k,m)+scip3*ptuind(1,k,m))
-                      ftmtmp(2) = -gfd*yr - temp5
+                      ftmtmp(2) = gfd*yr + temp5
      &                        * (sci4*ptuinp(2,i,l)+scip4*ptuind(2,i,l)
      &                          +sci3*ptuinp(2,k,m)+scip3*ptuind(2,k,m))
-                      ftmtmp(3) = -gfd*zr - temp5
+                      ftmtmp(3) = gfd*zr + temp5
      &                        * (sci4*ptuinp(3,i,l)+scip4*ptuind(3,i,l)
      &                          +sci3*ptuinp(3,k,m)+scip3*ptuind(3,k,m))
+                      temp3 = 0.5d0 * rr3 * uscale(kk) * scip2
+                      temp5 = -0.5d0 * rr5 * uscale(kk)
+     &                           * (sci3*scip4+scip3*sci4)
+                      findmp(1) = temp3*ddsc3(1) + temp5*ddsc5(1)
+                      findmp(2) = temp3*ddsc3(2) + temp5*ddsc5(2)
+                      findmp(3) = temp3*ddsc3(3) + temp5*ddsc5(3)
                       ftm2i(1) = ftm2i(1) +
-     &                        ptcoefs(o)*(ftmtmp(1)-fdir(1)-findmp(1))
+     &                        ptcoefs(o)*(ftmtmp(1)-findmp(1))
                       ftm2i(2) = ftm2i(2) +
-     &                        ptcoefs(o)*(ftmtmp(2)-fdir(2)-findmp(2))
+     &                        ptcoefs(o)*(ftmtmp(2)-findmp(2))
                       ftm2i(3) = ftm2i(3) +
-     &                        ptcoefs(o)*(ftmtmp(3)-fdir(3)-findmp(3))
+     &                        ptcoefs(o)*(ftmtmp(3)-findmp(3))
                    enddo
                  enddo
 c OPT IMPLEMENTATION
