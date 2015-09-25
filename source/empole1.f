@@ -6903,7 +6903,7 @@ c
                      fphip(j,i) = electric * fphip(j,i)
                   end do
                end do
-               do m = 0, ptmaxord-1
+               do m = 0, ptmaxord-1-l
                   c = ptcoefs(l+m+1)
                   if(abs(c) .lt. 1D-6) cycle
                   do i = 1, npole
