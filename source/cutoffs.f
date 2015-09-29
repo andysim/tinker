@@ -175,7 +175,11 @@ c
 c
 c     preconditioner list only needed for mutual polarization
 c
-      if (poltyp .ne. 'MUTUAL')  use_ulist = .false.
+c OPT IMPLEMENTATION
+      if (poltyp .ne. 'MUTUAL' .and. poltyp(1:3) .ne. 'OPT' )
+     &                            use_ulist = .false.
+      !if (poltyp .ne. 'MUTUAL' )  use_ulist = .false.
+c OPT IMPLEMENTATION
       if (use_list)  usolvcut = usolvcut - pbuffer
 c
 c     apply any Ewald cutoff to charge and multipole terms
