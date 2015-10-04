@@ -588,12 +588,12 @@ c OPT IMPLEMENTATION
            maxp = sqrt(maxp)*debye
            write(*,*) 
            write(*,'(A16,F12.10,A16,F12.10,A5,I5)') "Uind RMS error: ",
-     &       sqrt(sumd/(3d0*npole))*debye, "Max:", maxd, " for ", imaxd
+     &       sqrt(sumd/(3d0*npole))*debye, "Max: ", maxd, " for ", imaxd
            write(*,'(A16,F12.10,A16,F12.10,A5,I5)') "Uinp RMS error: ",
-     &       sqrt(sump/(3d0*npole))*debye, "Max:", maxp, " for ", imaxp
+     &       sqrt(sump/(3d0*npole))*debye, "Max: ", maxp, " for ", imaxp
            write(*,*) 
-           write(*,'(A23)')  "Optimized coefficients:"
-           write(*,'(20F8.4)')  ptcoefsf(0:ptmaxord)
+           write(*,'(A23,20F8.4)')  "Optimized coefficients: ",
+     &                                    ptcoefsf(0:ptmaxord)
            write(*,*)  
            csum = 0d0
            do i = 0,ptmaxord
