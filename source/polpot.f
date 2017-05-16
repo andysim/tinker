@@ -79,6 +79,10 @@ c
                   pscale(i) = v
                end do
                return
+            case ('ONE   ')
+               dscale(1:n) = 1.0d0
+               pscale(1:n) = 1.0d0
+               return
             case DEFAULT
                write(*,*) "Unknown POLGROUP", polgroups
                stop
