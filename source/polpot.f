@@ -42,6 +42,46 @@ c
       real*8 u1scale,u2scale
       real*8 u3scale,u4scale
       real*8 udiag
+      character*6 polgroups
       character*6 poltyp
       save
+      contains
+      subroutine munge_factors(n, dscale, pscale)
+         integer i,n
+         real*8 v, dscale(*), pscale(*)
+         select case (polgroups)
+            case ('PANDD ')
+               return
+            case ('PONLY ')
+               dscale(1:n) = pscale(1:n)
+               return
+            case ('DONLY ')
+               pscale(1:n) = dscale(1:n)
+               return
+            case ('AVE   ')
+               do i=1,n
+                  v = 0.5d0*(dscale(i)+pscale(i))
+                  dscale(i) = v
+                  pscale(i) = v
+               end do
+               return
+            case ('MIN   ')
+               do i=1,n
+                  v = MIN(dscale(i),pscale(i))
+                  dscale(i) = v
+                  pscale(i) = v
+               end do
+               return
+            case ('MAX   ')
+               do i=1,n
+                  v = MAX(dscale(i),pscale(i))
+                  dscale(i) = v
+                  pscale(i) = v
+               end do
+               return
+            case DEFAULT
+               write(*,*) "Unknown POLGROUP", polgroups
+               stop
+         end select
+      end subroutine munge_factors
       end

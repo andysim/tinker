@@ -248,6 +248,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -753,6 +754,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     for periodic boundary conditions with large cutoffs
@@ -817,6 +820,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -1338,6 +1342,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
       end if
 c
@@ -1633,6 +1639,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -2135,6 +2142,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     OpenMP directives for the major loop structure
@@ -2615,6 +2624,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -3223,6 +3233,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     for periodic boundary conditions with large cutoffs
@@ -3287,6 +3299,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -3837,6 +3850,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
       end if
 c
@@ -4320,6 +4335,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -4929,6 +4945,8 @@ c
             dscale(ip14(j,ii)) = 1.0d0
             uscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     OpenMP directives for the major loop structure

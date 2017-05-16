@@ -37,8 +37,8 @@ c     hard coded minimum of 0.24x10-307 is a patch needed for
 c     some machines (SGI's, Sparc CPU's under Linux, etc.)
 c
       if (i .eq. 1) then
-         do while (precise .ne. zero)
-c        do while (precise .ge. 0.24d-307)
+c         do while (precise .ne. zero)
+        do while (precise .ge. 0.24d-307)
             value = precise
             precise = precise / delta
          end do

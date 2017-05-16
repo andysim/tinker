@@ -98,6 +98,7 @@ c
       real*8 duik,quik
       real*8 term1,term2,term3
       real*8, allocatable :: pscale(:)
+      real*8, allocatable :: dscale(:)
       character*6 mode
 c
 c
@@ -121,11 +122,13 @@ c
 c     perform dynamic allocation of some local arrays
 c
       allocate (pscale(n))
+      allocate (dscale(n))
 c
 c     initialize connected atom exclusion coefficients
 c
       do i = 1, n
          pscale(i) = 1.0d0
+         dscale(i) = 1.0d0
       end do
 c
 c     set conversion factor, cutoff and switching coefficients
@@ -172,6 +175,19 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = p5scale
          end do
+         do j = 1, np11(ii)
+            dscale(ip11(j,ii)) = d1scale
+         end do
+         do j = 1, np12(ii)
+            dscale(ip12(j,ii)) = d2scale
+         end do
+         do j = 1, np13(ii)
+            dscale(ip13(j,ii)) = d3scale
+         end do
+         do j = 1, np14(ii)
+            dscale(ip14(j,ii)) = d4scale
+         end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -278,6 +294,8 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     for periodic boundary conditions with large cutoffs
@@ -323,6 +341,19 @@ c
             do j = 1, n15(ii)
                pscale(i15(j,ii)) = p5scale
             end do
+            do j = 1, np11(ii)
+               dscale(ip11(j,ii)) = d1scale
+            end do
+            do j = 1, np12(ii)
+               dscale(ip12(j,ii)) = d2scale
+            end do
+            do j = 1, np13(ii)
+               dscale(ip13(j,ii)) = d3scale
+            end do
+            do j = 1, np14(ii)
+               dscale(ip14(j,ii)) = d4scale
+            end do
+            call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -434,12 +465,15 @@ c
             do j = 1, n15(ii)
                pscale(i15(j,ii)) = 1.0d0
             end do
+            dscale = 1.0d0
+            pscale = 1.0d0
          end do
       end if
 c
 c     perform deallocation of some local arrays
 c
       deallocate (pscale)
+      deallocate (dscale)
       return
       end
 c
@@ -496,6 +530,7 @@ c
       real*8 duik,quik
       real*8 term1,term2,term3
       real*8, allocatable :: pscale(:)
+      real*8, allocatable :: dscale(:)
       character*6 mode
 c
 c
@@ -519,11 +554,13 @@ c
 c     perform dynamic allocation of some local arrays
 c
       allocate (pscale(n))
+      allocate (dscale(n))
 c
 c     initialize connected atom exclusion coefficients
 c
       do i = 1, n
          pscale(i) = 1.0d0
+         dscale(i) = 1.0d0
       end do
 c
 c     set conversion factor, cutoff and switching coefficients
@@ -579,6 +616,19 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = p5scale
          end do
+         do j = 1, np11(ii)
+            dscale(ip11(j,ii)) = d1scale
+         end do
+         do j = 1, np12(ii)
+            dscale(ip12(j,ii)) = d2scale
+         end do
+         do j = 1, np13(ii)
+            dscale(ip13(j,ii)) = d3scale
+         end do
+         do j = 1, np14(ii)
+            dscale(ip14(j,ii)) = d4scale
+         end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -686,6 +736,8 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     OpenMP directives for the major loop structure
@@ -696,6 +748,7 @@ c
 c     perform deallocation of some local arrays
 c
       deallocate (pscale)
+      deallocate (dscale)
       return
       end
 c
@@ -862,6 +915,7 @@ c
       real*8 term1,term2,term3
       real*8 bn(0:3)
       real*8, allocatable :: pscale(:)
+      real*8, allocatable :: dscale(:)
       character*6 mode
       external erfc
 c
@@ -869,11 +923,13 @@ c
 c     perform dynamic allocation of some local arrays
 c
       allocate (pscale(n))
+      allocate (dscale(n))
 c
 c     initialize connected atom exclusion coefficients
 c
       do i = 1, n
          pscale(i) = 1.0d0
+         dscale(i) = 1.0d0
       end do
 c
 c     set conversion factor, cutoff and switching coefficients
@@ -920,6 +976,19 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = p5scale
          end do
+         do j = 1, np11(ii)
+            dscale(ip11(j,ii)) = d1scale
+         end do
+         do j = 1, np12(ii)
+            dscale(ip12(j,ii)) = d2scale
+         end do
+         do j = 1, np13(ii)
+            dscale(ip13(j,ii)) = d3scale
+         end do
+         do j = 1, np14(ii)
+            dscale(ip14(j,ii)) = d4scale
+         end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -1046,6 +1115,8 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     for periodic boundary conditions with large cutoffs
@@ -1091,6 +1162,19 @@ c
             do j = 1, n15(ii)
                pscale(i15(j,ii)) = p5scale
             end do
+            do j = 1, np11(ii)
+               dscale(ip11(j,ii)) = d1scale
+            end do
+            do j = 1, np12(ii)
+               dscale(ip12(j,ii)) = d2scale
+            end do
+            do j = 1, np13(ii)
+               dscale(ip13(j,ii)) = d3scale
+            end do
+            do j = 1, np14(ii)
+               dscale(ip14(j,ii)) = d4scale
+            end do
+            call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -1223,6 +1307,8 @@ c
             do j = 1, n15(ii)
                pscale(i15(j,ii)) = 1.0d0
             end do
+            dscale = 1.0d0
+            pscale = 1.0d0
          end do
       end if
 c
@@ -1395,6 +1481,7 @@ c
       real*8 term1,term2,term3
       real*8 bn(0:3)
       real*8, allocatable :: pscale(:)
+      real*8, allocatable :: dscale(:)
       character*6 mode
       external erfc
 c
@@ -1402,11 +1489,13 @@ c
 c     perform dynamic allocation of some local arrays
 c
       allocate (pscale(n))
+      allocate (dscale(n))
 c
 c     initialize connected atom exclusion coefficients
 c
       do i = 1, n
          pscale(i) = 1.0d0
+         dscale(i) = 1.0d0
       end do
 c
 c     set conversion factor, cutoff and switching coefficients
@@ -1462,6 +1551,19 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = p5scale
          end do
+         do j = 1, np11(ii)
+            dscale(ip11(j,ii)) = d1scale
+         end do
+         do j = 1, np12(ii)
+            dscale(ip12(j,ii)) = d2scale
+         end do
+         do j = 1, np13(ii)
+            dscale(ip13(j,ii)) = d3scale
+         end do
+         do j = 1, np14(ii)
+            dscale(ip14(j,ii)) = d4scale
+         end do
+         call munge_factors(n, dscale, pscale)
 c
 c     evaluate all sites within the cutoff distance
 c
@@ -1589,6 +1691,8 @@ c
          do j = 1, n15(ii)
             pscale(i15(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     OpenMP directives for the major loop structure
@@ -1599,6 +1703,7 @@ c
 c     perform deallocation of some local arrays
 c
       deallocate (pscale)
+      deallocate (dscale)
       return
       end
 c

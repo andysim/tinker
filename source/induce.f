@@ -703,6 +703,7 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = d4scale
          end do
+         call munge_factors(n, dscale, pscale)
          do k = i+1, npole
             kk = ipole(k)
             proceed = .true.
@@ -801,6 +802,8 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     periodic boundary for large cutoffs via replicates method
@@ -844,6 +847,7 @@ c
             do j = 1, np14(ii)
                dscale(ip14(j,ii)) = d4scale
             end do
+            call munge_factors(n, dscale, pscale)
             do k = i, npole
                kk = ipole(k)
                ck = rpole(1,k)
@@ -954,6 +958,8 @@ c
             do j = 1, np14(ii)
                dscale(ip14(j,ii)) = 1.0d0
             end do
+            dscale = 1.0d0
+            pscale = 1.0d0
          end do
       end if
 c
@@ -1375,6 +1381,7 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = d4scale
          end do
+         call munge_factors(n, dscale, pscale)
          do kkk = 1, nelst(i)
             k = elst(kkk,i)
             kk = ipole(k)
@@ -1474,6 +1481,8 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     perform deallocation of some local arrays
@@ -2124,6 +2133,7 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = d4scale
          end do
+         call munge_factors(n, dscale, pscale)
          do k = i+1, npole
             kk = ipole(k)
             xr = x(kk) - x(ii)
@@ -2259,6 +2269,8 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     periodic boundary for large cutoffs via replicates method
@@ -2302,6 +2314,7 @@ c
             do j = 1, np14(ii)
                dscale(ip14(j,ii)) = d4scale
             end do
+            call munge_factors(n, dscale, pscale)
             do k = i, npole
                kk = ipole(k)
                ck = rpole(1,k)
@@ -2457,6 +2470,8 @@ c
             do j = 1, np14(ii)
                dscale(ip14(j,ii)) = 1.0d0
             end do
+            dscale = 1.0d0
+            pscale = 1.0d0
          end do
       end if
 c
@@ -2647,6 +2662,7 @@ c
             dscale(ip14(j,ii)) = d4scale
             uscale(ip14(j,ii)) = u4scale
          end do
+         call munge_factors(n, dscale, pscale)
          do kkk = 1, nelst(i)
             k = elst(kkk,i)
             kk = ipole(k)
@@ -2803,6 +2819,8 @@ c
             uscale(ip14(j,ii)) = 1.0d0
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 !$OMP END DO
 c
@@ -4113,6 +4131,7 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = d4scale
          end do
+         call munge_factors(n, dscale, pscale)
          do k = i, npole
             kk = ipole(k)
             rbk = rborn(kk)
@@ -4388,6 +4407,8 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 !$OMP END DO
 c
@@ -5342,6 +5363,7 @@ c
          pscale(i) = 1.0d0
          dscale(i) = 1.0d0
       end do
+      call munge_factors(n, dscale, pscale)
 c
 c     compute the direct electrostatic field at each atom, and
 c     another field including RF due to permanent multipoles;
@@ -5489,6 +5511,8 @@ c
          do j = 1, np14(ii)
             dscale(ip14(j,ii)) = 1.0d0
          end do
+         dscale = 1.0d0
+         pscale = 1.0d0
       end do
 c
 c     perform deallocation of some local arrays
