@@ -58,6 +58,20 @@ c
             case ('DONLY ')
                pscale(1:n) = dscale(1:n)
                return
+            case ('HYBRID')
+               do i=1,n
+                  if(dscale(i) .eq. 0d0) then
+                     ! We're in a polarization group
+                     dscale(i) = 0d0
+                     pscale(i) = 0d0
+                  else
+                     ! All other cases, just average
+                     v = 0.8d0*dscale(i)+0.2d0*pscale(i)
+                     dscale(i) = v
+                     pscale(i) = v
+                  endif
+               end do
+               return
             case ('AVE   ')
                do i=1,n
                   v = 0.5d0*(dscale(i)+pscale(i))

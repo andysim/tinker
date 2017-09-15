@@ -321,9 +321,10 @@ c
      &                       //,' Type',14x,'Atom Names',
      &                          15x,'Distance',8x,'Energy',/)
                   end if
-                  write (iout,30)  ii,name(ii),kk,name(kk),r,e
+              write (iout,30)  ii,name(ii),kk,name(kk),r,e,
+     &         dscale(kk),pscale(kk)
    30             format (' Polar',5x,2(i7,'-',a3),9x,
-     &                       f10.4,2x,f12.4)
+     &                       f10.4,2x,f12.4,2x,f4.2,2x,f4.2)
                end if
             end if
          end do
