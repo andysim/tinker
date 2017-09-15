@@ -1818,11 +1818,11 @@ c
       end
 c
 c
-c     ###############################################################
-c     ##                                                           ##
-c     ##  subroutine eprecip  --  polarization Ewald recip energy  ##
-c     ##                                                           ##
-c     ###############################################################
+c     ###################################################################
+c     ##                                                               ##
+c     ##  subroutine eprecip  --  PME recip space polarization energy  ##
+c     ##                                                               ##
+c     ###################################################################
 c
 c
 c     "eprecip" evaluates the reciprocal space portion of particle
@@ -1856,13 +1856,13 @@ c
       use polpot
       use potent
       implicit none
-      integer i,j,k,ii
+      integer i,j,k
       integer k1,k2,k3
       integer m1,m2,m3
       integer ntot,nff
       integer nf1,nf2,nf3
-      real*8 e,r1,r2,r3,f
-      real*8 h1,h2,h3
+      real*8 e,r1,r2,r3
+      real*8 f,h1,h2,h3
       real*8 volterm,denom
       real*8 hsq,expterm
       real*8 term,pterm
@@ -1876,6 +1876,7 @@ c
 c     return if the Ewald coefficient is zero
 c
       if (aewald .lt. 1.0d-6)  return
+      f = electric / dielec
 c
 c     perform dynamic allocation of some global arrays
 c
@@ -1967,7 +1968,7 @@ c
             qfac(k1,k2,k3) = expterm
          end do
 c
-c     account for the zeroth grid point for a finite system
+c     account for zeroth grid point for nonperiodic system
 c
          qfac(1,1,1) = 0.0d0
          if (.not. use_bounds) then
@@ -2024,12 +2025,12 @@ c
       call grid_uind (fuind,fuinp)
       call fftfront
 c
-c     account for the zeroth grid point for a finite system
+c     account for zeroth grid point for nonperiodic system
 c
       if (.not. use_bounds) then
          expterm = 0.5d0 * pi / xbox
          struc2 = qgrid(1,1,1,1)**2 + qgrid(2,1,1,1)**2
-         e = 0.5d0 * f * expterm * struc2
+         e = f * expterm * struc2
          ep = ep + e
       end if
 c
@@ -2037,7 +2038,6 @@ c     increment the induced dipole polarization energy
 c
       e = 0.0d0
       do i = 1, npole
-         ii = ipole(i)
          do k = 1, 3
             e = e + fuind(k,i)*fphi(k+1,i)
          end do

@@ -1393,10 +1393,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -2197,10 +2200,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -3901,10 +3907,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -5000,10 +5009,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -5032,16 +5044,15 @@ c
       end
 c
 c
-c     ##################################################################
-c     ##                                                              ##
-c     ##  subroutine eprecip1  --  polar Ewald recip energy & derivs  ##
-c     ##                                                              ##
-c     ##################################################################
+c     ###################################################################
+c     ##                                                               ##
+c     ##  subroutine eprecip1  --  PME recip polarize energy & derivs  ##
+c     ##                                                               ##
+c     ###################################################################
 c
 c
-c     "eprecip1" evaluates the reciprocal space portion of the
-c     particle mesh Ewald summation energy and gradient due to
-c     dipole polarization
+c     "eprecip1" evaluates the reciprocal space portion of the particle
+c     mesh Ewald summation energy and gradient due to dipole polarization
 c
 c     literature reference:
 c
@@ -5077,15 +5088,19 @@ c
       integer j1,j2,j3
       integer k1,k2,k3
       integer m1,m2,m3
+      integer iax,iay,iaz
       integer ntot,nff
       integer nf1,nf2,nf3
       integer deriv1(10)
       integer deriv2(10)
       integer deriv3(10)
-      real*8 e,eterm
+      real*8 e,eterm,f
       real*8 r1,r2,r3
       real*8 h1,h2,h3
       real*8 f1,f2,f3
+      real*8 xix,yix,zix
+      real*8 xiy,yiy,ziy
+      real*8 xiz,yiz,ziz
       real*8 vxx,vyy,vzz
       real*8 vxy,vxz,vyz
       real*8 volterm,denom
@@ -5115,6 +5130,7 @@ c
 c     return if the Ewald coefficient is zero
 c
       if (aewald .lt. 1.0d-6)  return
+      f = electric / dielec
 c
 c     perform dynamic allocation of some global arrays
 c
@@ -5222,7 +5238,7 @@ c
                   if (mod(m1+m2+m3,2) .ne. 0)  expterm = 0.0d0
                end if
                struc2 = qgrid(1,k1,k2,k3)**2 + qgrid(2,k1,k2,k3)**2
-               eterm = 0.5d0 * electric * expterm * struc2
+               eterm = 0.5d0 * f * expterm * struc2
                vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
                vxx = vxx - h1*h1*vterm + eterm
                vxy = vxy - h1*h2*vterm
@@ -5233,14 +5249,13 @@ c
             end if
          end do
 c
-c     account for the zeroth grid point for a finite system
+c     account for zeroth grid point for nonperiodic system
 c
          qfac(1,1,1) = 0.0d0
          if (.not. use_bounds) then
             expterm = 0.5d0 * pi / xbox
             struc2 = qgrid(1,1,1,1)**2 + qgrid(2,1,1,1)**2
-            e = 0.5d0 * expterm * struc2
-            em = em + e
+            e = f * expterm * struc2
             qfac(1,1,1) = expterm
          end if
 c
@@ -5262,7 +5277,7 @@ c
          call fphi_mpole (fphi)
          do i = 1, npole
             do j = 1, 20
-               fphi(j,i) = electric * fphi(j,i)
+               fphi(j,i) = f * fphi(j,i)
             end do
          end do
          call fphi_to_cphi (fphi,cphi)
@@ -5311,12 +5326,12 @@ c
       call grid_uind (fuind,fuinp)
       call fftfront
 c
-c     account for the zeroth grid point for a finite system
+c     account for zeroth grid point for nonperiodic system
 c
       if (.not. use_bounds) then
          expterm = 0.5d0 * pi / xbox
          struc2 = qgrid(1,1,1,1)**2 + qgrid(2,1,1,1)**2
-         e = 0.5d0 * expterm * struc2
+         e = f * expterm * struc2
          ep = ep + e
       end if
 c
@@ -5338,17 +5353,17 @@ c
       call fphi_uind (fphid,fphip,fphidp)
       do i = 1, npole
          do j = 1, 10
-            fphid(j,i) = electric * fphid(j,i)
-            fphip(j,i) = electric * fphip(j,i)
+            fphid(j,i) = f * fphid(j,i)
+            fphip(j,i) = f * fphip(j,i)
          end do
          do j = 1, 20
-            fphidp(j,i) = electric * fphidp(j,i)
+            fphidp(j,i) = f * fphidp(j,i)
          end do
       end do
 c
-c     increment the induced dipole energy and gradient
+c     increment the dipole polarization energy and gradient
 c
-c     e = 0.0d0
+      e = 0.0d0
       do i = 1, npole
          ii = ipole(i)
          f1 = 0.0d0
@@ -5404,7 +5419,7 @@ c
       end do
       call fphi_to_cphi (fphidp,cphi)
 c
-c     distribute torques into the induced dipole gradient
+c     resolve site torques then increment forces and virial
 c
       do i = 1, npole
          trq(1) = cmp(4,i)*cphi(3,i) - cmp(3,i)*cphi(4,i)
@@ -5429,9 +5444,34 @@ c
             trq(3) = trq(3) + idip(2)*cphi(2,i) - idip(1)*cphi(3,i)
          endif
          call torque (i,trq,fix,fiy,fiz,dep)
+         ii = ipole(i)
+         iaz = zaxis(i)
+         iax = xaxis(i)
+         iay = yaxis(i)
+         if (iaz .eq. 0)  iaz = ii
+         if (iax .eq. 0)  iax = ii
+         if (iay .eq. 0)  iay = ii
+         xiz = x(iaz) - x(ii)
+         yiz = y(iaz) - y(ii)
+         ziz = z(iaz) - z(ii)
+         xix = x(iax) - x(ii)
+         yix = y(iax) - y(ii)
+         zix = z(iax) - z(ii)
+         xiy = x(iay) - x(ii)
+         yiy = y(iay) - y(ii)
+         ziy = z(iay) - z(ii)
+         vxx = vxx + xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
+         vxy = vxy + 0.5d0*(yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = vxz + 0.5d0*(zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
+         vyy = vyy + yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
+         vyz = vyz + 0.5d0*(zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
+         vzz = vzz + zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
       end do
 c
-c     induced dipole contribution to the internal virial
+c     increment the dipole polarization virial contributions
 c
       do i = 1, npole
          do j = 2, 4
@@ -5503,8 +5543,8 @@ c
             ii = ipole(i)
             do k = 0, coptmax-1
                do j = 1, 10
-                  fphid(j,i) = electric * fopt(k,j,i)
-                  fphip(j,i) = electric * foptp(k,j,i)
+                  fphid(j,i) = f * fopt(k,j,i)
+                  fphip(j,i) = f * foptp(k,j,i)
                end do
                do m = 0, coptmax-k-1
                   do j = 1, 3
@@ -5641,7 +5681,7 @@ c
             end if
             struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
      &                  + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
-            eterm = 0.5d0 * electric * expterm * struc2
+            eterm = 0.5d0 * f * expterm * struc2
             vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
             vxx = vxx + h1*h1*vterm - eterm
             vxy = vxy + h1*h2*vterm
@@ -5717,7 +5757,7 @@ c
                end if
                struc2 = qgrid(1,k1,k2,k3)*qgrip(1,k1,k2,k3)
      &                     + qgrid(2,k1,k2,k3)*qgrip(2,k1,k2,k3)
-               eterm = 0.5d0 * electric * expterm * struc2
+               eterm = 0.5d0 * f * expterm * struc2
                vterm = (2.0d0/hsq) * (1.0d0-term) * eterm
                vxx = vxx - h1*h1*vterm + eterm
                vxy = vxy - h1*h2*vterm
@@ -5729,7 +5769,7 @@ c
          end do
       end if
 c
-c     increment the internal virial tensor components
+c     increment the total internal virial tensor components
 c
       vir(1,1) = vir(1,1) + vxx
       vir(2,1) = vir(2,1) + vxy

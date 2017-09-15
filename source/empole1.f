@@ -731,10 +731,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -1165,10 +1168,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -2049,10 +2055,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -2646,10 +2655,13 @@ c
          yiy = y(iay) - y(ii)
          ziy = z(iay) - z(ii)
          vxx = xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
-         vxy = yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
-         vxz = zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+         vxy = 0.5d0 * (yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = 0.5d0 * (zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
          vyy = yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
-         vyz = zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+         vyz = 0.5d0 * (zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
          vzz = zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
          vir(1,1) = vir(1,1) + vxx
          vir(2,1) = vir(2,1) + vxy
@@ -2675,11 +2687,11 @@ c
       end
 c
 c
-c     ##################################################################
-c     ##                                                              ##
-c     ##  subroutine emrecip1  --  mpole Ewald recip energy & derivs  ##
-c     ##                                                              ##
-c     ##################################################################
+c     ####################################################################
+c     ##                                                                ##
+c     ##  subroutine emrecip1  --  PME recip multipole energy & derivs  ##
+c     ##                                                                ##
+c     ####################################################################
 c
 c
 c     "emrecip1" evaluates the reciprocal space portion of the particle
@@ -2715,15 +2727,19 @@ c
       integer i,j,k,ii
       integer k1,k2,k3
       integer m1,m2,m3
+      integer iax,iay,iaz
       integer ntot,nff
       integer nf1,nf2,nf3
       integer deriv1(10)
       integer deriv2(10)
       integer deriv3(10)
-      real*8 e,eterm
+      real*8 e,eterm,f
       real*8 r1,r2,r3
       real*8 h1,h2,h3
       real*8 f1,f2,f3
+      real*8 xix,yix,zix
+      real*8 xiy,yiy,ziy
+      real*8 xiz,yiz,ziz
       real*8 vxx,vyy,vzz
       real*8 vxy,vxz,vyz
       real*8 volterm,denom
@@ -2743,6 +2759,7 @@ c
 c     return if the Ewald coefficient is zero
 c
       if (aewald .lt. 1.0d-6)  return
+      f = electric / dielec
 c
 c     perform dynamic allocation of some global arrays
 c
@@ -2859,13 +2876,13 @@ c
       vmyz = vyz
       vmzz = vzz
 c
-c     account for the zeroth grid point for a finite system
+c     account for zeroth grid point for nonperiodic system
 c
       qfac(1,1,1) = 0.0d0
       if (.not. use_bounds) then
          expterm = 0.5d0 * pi / xbox
          struc2 = qgrid(1,1,1,1)**2 + qgrid(2,1,1,1)**2
-         e = 0.5d0 * expterm * struc2
+         e = f * expterm * struc2
          em = em + e
          qfac(1,1,1) = expterm
       end if
@@ -2888,7 +2905,7 @@ c
       call fphi_mpole (fphi)
       do i = 1, npole
          do j = 1, 20
-            fphi(j,i) = electric * fphi(j,i)
+            fphi(j,i) = f * fphi(j,i)
          end do
       end do
       call fphi_to_cphi (fphi,cphi)
@@ -2920,25 +2937,7 @@ c
       e = 0.5d0 * e
       em = em + e
 c
-c     distribute torques into the permanent multipole gradient
-c
-      do i = 1, npole
-         trq(1) = cmp(4,i)*cphi(3,i) - cmp(3,i)*cphi(4,i)
-     &               + 2.0d0*(cmp(7,i)-cmp(6,i))*cphi(10,i)
-     &               + cmp(9,i)*cphi(8,i) + cmp(10,i)*cphi(6,i)
-     &               - cmp(8,i)*cphi(9,i) - cmp(10,i)*cphi(7,i)
-         trq(2) = cmp(2,i)*cphi(4,i) - cmp(4,i)*cphi(2,i)
-     &               + 2.0d0*(cmp(5,i)-cmp(7,i))*cphi(9,i)
-     &               + cmp(8,i)*cphi(10,i) + cmp(9,i)*cphi(7,i)
-     &               - cmp(9,i)*cphi(5,i) - cmp(10,i)*cphi(8,i)
-         trq(3) = cmp(3,i)*cphi(2,i) - cmp(2,i)*cphi(3,i)
-     &               + 2.0d0*(cmp(6,i)-cmp(5,i))*cphi(8,i)
-     &               + cmp(8,i)*cphi(5,i) + cmp(10,i)*cphi(9,i)
-     &               - cmp(8,i)*cphi(6,i) - cmp(9,i)*cphi(10,i)
-         call torque (i,trq,fix,fiy,fiz,dem)
-      end do
-c
-c     permanent multipole contribution to the internal virial
+c     increment the permanent multipole virial contributions
 c
       do i = 1, npole
          vxx = vxx - cmp(2,i)*cphi(2,i) - 2.0d0*cmp(5,i)*cphi(5,i)
@@ -2961,7 +2960,50 @@ c
      &            - cmp(9,i)*cphi(9,i) - cmp(10,i)*cphi(10,i)
       end do
 c
-c     increment the internal virial tensor components
+c     resolve site torques then increment forces and virial
+c
+      do i = 1, npole
+         trq(1) = cmp(4,i)*cphi(3,i) - cmp(3,i)*cphi(4,i)
+     &               + 2.0d0*(cmp(7,i)-cmp(6,i))*cphi(10,i)
+     &               + cmp(9,i)*cphi(8,i) + cmp(10,i)*cphi(6,i)
+     &               - cmp(8,i)*cphi(9,i) - cmp(10,i)*cphi(7,i)
+         trq(2) = cmp(2,i)*cphi(4,i) - cmp(4,i)*cphi(2,i)
+     &               + 2.0d0*(cmp(5,i)-cmp(7,i))*cphi(9,i)
+     &               + cmp(8,i)*cphi(10,i) + cmp(9,i)*cphi(7,i)
+     &               - cmp(9,i)*cphi(5,i) - cmp(10,i)*cphi(8,i)
+         trq(3) = cmp(3,i)*cphi(2,i) - cmp(2,i)*cphi(3,i)
+     &               + 2.0d0*(cmp(6,i)-cmp(5,i))*cphi(8,i)
+     &               + cmp(8,i)*cphi(5,i) + cmp(10,i)*cphi(9,i)
+     &               - cmp(8,i)*cphi(6,i) - cmp(9,i)*cphi(10,i)
+         call torque (i,trq,fix,fiy,fiz,dem)
+         ii = ipole(i)
+         iaz = zaxis(i)
+         iax = xaxis(i)
+         iay = yaxis(i)
+         if (iaz .eq. 0)  iaz = ii
+         if (iax .eq. 0)  iax = ii
+         if (iay .eq. 0)  iay = ii
+         xiz = x(iaz) - x(ii)
+         yiz = y(iaz) - y(ii)
+         ziz = z(iaz) - z(ii)
+         xix = x(iax) - x(ii)
+         yix = y(iax) - y(ii)
+         zix = z(iax) - z(ii)
+         xiy = x(iay) - x(ii)
+         yiy = y(iay) - y(ii)
+         ziy = z(iay) - z(ii)
+         vxx = vxx + xix*fix(1) + xiy*fiy(1) + xiz*fiz(1)
+         vxy = vxy + 0.5d0*(yix*fix(1) + yiy*fiy(1) + yiz*fiz(1)
+     &                    + xix*fix(2) + xiy*fiy(2) + xiz*fiz(2))
+         vxz = vxz + 0.5d0*(zix*fix(1) + ziy*fiy(1) + ziz*fiz(1)
+     &                    + xix*fix(3) + xiy*fiy(3) + xiz*fiz(3)) 
+         vyy = vyy + yix*fix(2) + yiy*fiy(2) + yiz*fiz(2)
+         vyz = vyz + 0.5d0*(zix*fix(2) + ziy*fiy(2) + ziz*fiz(2)
+     &                    + yix*fix(3) + yiy*fiy(3) + yiz*fiz(3))
+         vzz = vzz + zix*fix(3) + ziy*fiy(3) + ziz*fiz(3)
+      end do
+c
+c     increment the total internal virial tensor components
 c
       vir(1,1) = vir(1,1) + vxx
       vir(2,1) = vir(2,1) + vxy

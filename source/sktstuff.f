@@ -38,10 +38,10 @@ c
       real*8, allocatable :: pz(:)
 c
 c
-c     check to see if the Java objects have been created
+c     check to see if the server has been created
 c
-      runtyp = 1
-      if (.not. skt_init)  call sktinit ()
+      skttyp = 1
+      if (.not. sktstart)  call sktinit ()
       if (.not. use_socket)  return
 c
 c     save the current step number, time and energy
@@ -53,7 +53,7 @@ c
 c     check to see if we need to update the system info
 c
       flag = 1
-      if (.not. skt_close)  call needupdate (flag)
+      if (.not. sktstop)  call needupdate (flag)
       if (flag .eq. 0)  return
 c
 c     get the monitor for the update structure
@@ -146,15 +146,18 @@ c
       integer i,k,ncycle
       integer flag
       real*8 eopt
+      real*8, allocatable :: gx(:)
+      real*8, allocatable :: gy(:)
+      real*8, allocatable :: gz(:)
       real*8, allocatable :: px(:)
       real*8, allocatable :: py(:)
       real*8, allocatable :: pz(:)
 c
 c
-c     check to see if the Server has been created
+c     check to see if the server has been created
 c
-      runtyp = 2
-      if (.not. skt_init)  call sktinit ()
+      skttyp = 2
+      if (.not. sktstart)  call sktinit ()
       if (.not. use_socket)  return
 c
 c     save the current step number and energy
@@ -165,7 +168,7 @@ c
 c     check to see if an update is needed
 c
       flag = 1
-      if (.not. skt_close)  call needupdate (flag)
+      if (.not. sktstop)  call needupdate (flag)
       if (flag .eq. 0)  return
 c
 c     get the monitor for the update structure
@@ -178,14 +181,11 @@ c
       call setstep (ncycle)
       call setenergy (eopt)
 c
-c     perform dynamic allocation of some global arrays
-c
-      if (.not. allocated(cdx))  allocate (cdx(n))
-      if (.not. allocated(cdy))  allocate (cdy(n))
-      if (.not. allocated(cdz))  allocate (cdz(n))
-c
 c     perform dynamic allocation of some local arrays
 c
+      allocate (gx(n))
+      allocate (gy(n))
+      allocate (gz(n))
       allocate (px(n))
       allocate (py(n))
       allocate (pz(n))
@@ -193,14 +193,14 @@ c
 c     load the gradient and induced dipole information
 c
       do i = 1, n
-         cdx(i) = desum(1,i)
-         cdy(i) = desum(2,i)
-         cdz(i) = desum(3,i)
+         gx(i) = desum(1,i)
+         gy(i) = desum(2,i)
+         gz(i) = desum(3,i)
          px(i) = 0.0d0
          py(i) = 0.0d0
          pz(i) = 0.0d0
       end do
-      call setgradients (n,cdx,cdy,cdz)
+      call setgradients (n,gx,gy,gz)
       if (use_polar) then
           do i = 1, npole
              k = ipole(i)
@@ -213,6 +213,9 @@ c
 c
 c     perform deallocation of some local arrays
 c
+      deallocate (gx)
+      deallocate (gy)
+      deallocate (gz)
       deallocate (px)
       deallocate (py)
       deallocate (pz)
@@ -261,7 +264,7 @@ c
 c
 c     set initialization flag and test for socket usage
 c
-      skt_init = .true.
+      sktstart = .true.
       use_socket = .true.
       call chksocket (flag)
       if (flag .eq. 0) then
@@ -274,13 +277,9 @@ c
       call createjvm (flag)
       if (flag .eq. 0) then
          use_socket = .false.
-         if (debug) then
-            write (iout,10)
-   10       format (/,' SKTINIT  --  Unable to Start Server for',
-     &                 ' Java GUI Communication',
-     &              /,' Check the LD_LIBRARY_PATH and CLASSPATH',
-     &                 ' Environment Variables',/)
-         end if
+         write (iout,10)
+   10    format (/,' SKTINIT  --  Unable to Create the JVM Server',
+     &           /,' Check LD_LIBRARY_PATH and CLASSPATH Variables',/)
          return
       end if
 c
@@ -289,6 +288,8 @@ c
       call createsystem (n,nkey,flag)
       if (flag .eq. 0) then
          use_socket = .false.
+         write (iout,20)
+   20    format (/,' SKTINIT  --  Unable to Create TINKER System',/)        
          return
       end if
 c
@@ -341,14 +342,18 @@ c
       call createserver (flag)
       if (flag .eq. 0) then
          use_socket = .false.
+         write (iout,30)
+   30    format (/,' SKTINIT  --  Unable to Create TINKER Server',/)
          return
       end if
 c
 c     create the update object
 c
-      call createupdate (n,runtyp,npolar,flag)
+      call createupdate (n,skttyp,npolar,flag)
       if (flag .eq. 0) then
          use_socket = .false.
+         write (iout,40)
+   40    format (/,' SKTINIT  --  Unable to Create Update Object',/)
          return
       end if
       return
@@ -374,12 +379,12 @@ c
 c     check to see if there is anything to close
 c
       if (.not. use_socket)  return
-      skt_close = .true.
+      sktstop = .true.
 c
 c     load the final simulation results
 c
-      if (runtyp .eq. 1)  call sktdyn (cstep,cdt,cenergy)
-      if (runtyp .eq. 2)  call sktopt (cstep,cenergy)
+      if (skttyp .eq. 1)  call sktdyn (cstep,cdt,cenergy)
+      if (skttyp .eq. 2)  call sktopt (cstep,cenergy)
 c
 c     shutdown the TINKER server
 c

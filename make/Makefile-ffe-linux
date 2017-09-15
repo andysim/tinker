@@ -63,6 +63,11 @@ APBS_LIBDIR = -L$(APBSDIR)/lib
 APBS_LIBS = -lapbsmainroutines -lapbs -lmaloc -lapbsblas
 
 FFEDIR = $(BUILDDIR)/ffe
+
+##  For MacOS Only
+#JAVA_INCDIR = -I$(FFEDIR)/native -I$(FFEDIR)/native/macos
+
+##  For Linux Only
 JAVA_INCDIR = -I$(FFEDIR)/native -I$(FFEDIR)/native/linux \
 		-I/usr/lib/jvm/java-8-oracle/include \
 		-I/usr/lib/jvm/java-8-oracle/include/linux \
@@ -70,12 +75,20 @@ JAVA_INCDIR = -I$(FFEDIR)/native -I$(FFEDIR)/native/linux \
 JAVA_LIBDIR = -L/usr/lib/jvm/java-8-oracle/jre/lib/amd64/server
 JAVA_LIBS = -ljvm
 
+##  For Windows Only
+#JAVA_INCDIR = -I$(FFEDIR)/native -I$(FFEDIR)/native/linux \
+#		-I"C:\Program Files\Java\jdk1.8.0_112\include" \
+#		-I"C:\Program Files\Java\jdk1.8.0_112\include\win32" \
+#		-I"C:\Program Files\Java\jdk1.8.0_112\lib"
+#JAVA_LIBDIR = -L"C:\Program Files\Java\jdk1.8.0_112\lib"
+#JAVA_LIBS = -ljvm
+
 ####################################################################
 ##  Known Machine Types; Uncomment One of the Following Sections  ##
 ##  May Need Editing to Match Your Desired OS & Compiler Version  ##
 ####################################################################
 
-##  Build:    TINKER (with APBS and FFE Support)
+##  Build:    TINKER
 ##  OS Type:  Generic Linux
 ##  CPU Type: Intel x86 Compatible (also AMD)
 ##  Compiler: GNU gfortran 6.2
@@ -93,7 +106,7 @@ RANLIB = ranlib
 LINKFLAGS = $(OPTFLAGS) -static-libgcc
 RENAME = rename_bin
 
-##  Build:    TINKER (with APBS and FFE Support)
+##  Build:    TINKER
 ##  OS Type:  Apple MacOS
 ##  CPU Type: Intel x86 Compatible
 ##  Compiler: GNU gfortran 6.2
@@ -112,7 +125,7 @@ RENAME = rename_bin
 #		CoreFoundation
 #RENAME = rename_bin
 
-##  Build:     TINKER (no APBS or FFE Support)
+##  Build:     TINKER
 ##  OS Type:   Microsoft Windows 10
 ##  CPU Type:  Intel x86 Compatible
 ##  Compiler:  MinGW GNU gfortran 5.4
@@ -126,11 +139,11 @@ RENAME = rename_bin
 #LIBDIR = -L. -L$(TINKER_LIBDIR)/windows
 #LIBS = -lstdc++
 #LIBFLAGS = -crusv
-#RANLIB = ranlib -c
+#RANLIB = ranlib
 #LINKFLAGS = $(OPTFLAGS) -static
 #RENAME = rename_exe
 
-##  Build:    TINKER (Standalone)
+##  Build:    TINKER
 ##  OS Type:  Generic Linux
 ##  CPU Type: Intel x86 Compatible (also AMD)
 ##  Oper Sys: Fedora Core
@@ -147,7 +160,7 @@ RENAME = rename_bin
 #LINKFLAGS = $(OPTFLAGS) -static-libgcc -static-intel
 #RENAME = rename_bin
 
-##  Build:    TINKER (Standalone)
+##  Build:    TINKER
 ##  OS Type:  Macintosh
 ##  CPU Type: Intel x86 Compatible
 ##  Oper Sys: MacOS 10.11 (El Capitan)
