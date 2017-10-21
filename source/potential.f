@@ -1082,9 +1082,9 @@ c
          qkyz = rpole(10,k)
          qkzz = rpole(13,k)
          if (use_polar) then
-            ukx = uinp(1,k)
-            uky = uinp(2,k)
-            ukz = uinp(3,k)
+            ukx = uind(1,k)
+            uky = uind(2,k)
+            ukz = uind(3,k)
          else
             uind(1,k) = 0.0d0
             uind(2,k) = 0.0d0
