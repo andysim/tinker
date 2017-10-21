@@ -42,6 +42,7 @@ c
       real*8 u1scale,u2scale
       real*8 u3scale,u4scale
       real*8 udiag
+      real*8 pdmix
       character*6 polgroups
       character*6 poltyp
       save
@@ -66,7 +67,7 @@ c
                      pscale(i) = 0d0
                   else
                      ! All other cases, just average
-                     v = 0.8d0*dscale(i)+0.2d0*pscale(i)
+                     v = 1d-2*((100d0-pdmix)*dscale(i)+pdmix*pscale(i))
                      dscale(i) = v
                      pscale(i) = v
                   endif

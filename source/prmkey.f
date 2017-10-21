@@ -351,6 +351,8 @@ c
          call getword (record,poltyp,next)
       else if (keyword(1:10) .eq. 'POLGROUPS ') then
          call getword (record,polgroups,next)
+      else if (keyword(1:10) .eq. 'PDMIX     ') then
+         read (string,*,err=10,end=10)  pdmix
       else if (keyword(1:11) .eq. 'POLAR-ITER ') then
          read (string,*,err=10,end=10)  politer
       else if (keyword(1:10) .eq. 'POLAR-EPS ') then
